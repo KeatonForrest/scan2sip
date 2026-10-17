@@ -17,6 +17,11 @@
 - **Hashes (SHA-256):**
   - `scan2sip-walkthrough.mp4` — `38ae6cd000afd6f4d98ec5ef2c1709a55fc2d8d90294d42d6640e07bf99d6815`
   - `preview.png` — `f283593d9440c6fa3ee2ca52f4a9c15c684dcad9607b51f4a5ea86edc1fc7d8e`
+- **Wording note:** reviewer-label wording in the current UI/docs was
+  clarified after recording (the button now reads “independently
+  reviewed” and the reviewer is explained in prose). Behavior and
+  fixtures are unchanged; the recording is honest historical metadata
+  for the revision above.
 - **What it shows:** synthetic fixture output end to end. The
   independently reviewed artifact in the flow was reviewed by a
   separate AI reviewer (referred to as “S” in project records), who
