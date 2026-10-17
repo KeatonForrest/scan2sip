@@ -86,14 +86,21 @@ production data or credentials of any kind; automatic retries.
 
 ## Interfaces (milestone 1)
 
-- `GET /api/fixtures` — fixture scenarios and their manifest entries.
-- `POST /api/scans` `{ fixture_id, request_id }` →
-  `{ request_id, observation, decision, wine?, demand_created }` where
-  `decision.status` ∈ `matched | missing | ambiguous | provisional |
-  not_wine | failed`; `missing` carries `reason` ∈ `unknown_wine |
-  vintage_mismatch | vintage_required`; `failed` carries `reason` ∈
+- `GET /api/fixtures` → `{ scenarios, manifest }` where `manifest`
+  reports `{ verified, asset_count, assets: [{ id, path, sha256, kind,
+  scenario }] }` for the integrity-verified fixture manifest.
+- `POST /api/scans` `{ fixture_id, request_id }` → a flat result object
+  `{ request_id, fixture_id, status, reason?, observation, wine_id?,
+  demand_created, replayed?, reservation_retained? }` where `status` ∈
+  `matched | missing | ambiguous | provisional | not_wine | failed`;
+  `missing` carries `reason` ∈ `unknown_wine | vintage_mismatch |
+  vintage_required`; `failed` carries `reason` ∈
   `provider_error_response | malformed_response |
-  provider_timeout_ambiguous`.
+  provider_timeout_ambiguous`. Reusing a `request_id` with a different
+  `fixture_id` is rejected with HTTP 409 `{ error: "request_conflict" }`.
+  At startup the server verifies every manifest entry's schema and
+  SHA-256 and binds each scenario to its label asset and authored
+  response; any mismatch fails startup with `fixture_integrity_failed`.
 - `GET /api/wines/:id` — catalog wine with per-field attribution
   (`value`, `status`, `source_id`, `quote`/`locator` where applicable).
 - `GET /api/demands` — deduplicated local research demand.
@@ -101,9 +108,9 @@ production data or credentials of any kind; automatic retries.
 
 ## Runtime
 
-- Node **24** pinned for development and checks; the exact tested patch
-  version is recorded in the milestone report and `package.json` engines.
-  Developed/tested with a Node 24 binary kept outside any other project's
-  checkout; no other project's Node version or dependencies are altered.
+- Node **24.22.0** is the pinned, tested runtime (`.nvmrc`,
+  `package.json` engines `>=24 <25`). Developed/tested with a Node
+  24.22.0 binary kept outside any other project's checkout; no other
+  project's Node version or dependencies are altered.
 - Fixture checks must pass with no credentials and outbound networking
   denied (after `npm ci`).

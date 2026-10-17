@@ -7,18 +7,25 @@ import { fileURLToPath } from 'node:url';
 import { Store } from './store.js';
 import { loadFixtureModel } from './adapters/fixtureModel.js';
 import { createService } from './service.js';
+import { verifyFixtureIntegrity } from './fixtureIntegrity.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const fixturesDir = path.join(root, 'fixtures');
 
-export function buildDemo({ dbPath = path.join(root, 'data', 'scan2sip.sqlite') } = {}) {
+export function buildDemo({
+  dbPath = path.join(root, 'data', 'scan2sip.sqlite'),
+  fixturesDir: fixturesRoot = fixturesDir,
+} = {}) {
+  // Startup fails closed on any manifest/schema/hash/scenario-binding
+  // problem; nothing is served from unverified fixtures.
+  const integrity = verifyFixtureIntegrity(fixturesRoot);
   if (dbPath !== ':memory:') fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   const store = new Store(dbPath);
-  const catalog = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'catalog.json'), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(path.join(fixturesRoot, 'catalog.json'), 'utf8'));
   store.seedWines(catalog.wines);
-  const model = loadFixtureModel(path.join(fixturesDir, 'responses.json'));
+  const model = loadFixtureModel(integrity.responses);
   const service = createService({ store, model });
-  return { store, service, catalog };
+  return { store, service, catalog, integrity };
 }
 
 export function createApp(demo = buildDemo()) {
@@ -32,7 +39,15 @@ export function createApp(demo = buildDemo()) {
   app.use('/fixtures', express.static(fixturesDir));
   app.use(express.static(path.join(root, 'web')));
 
-  app.get('/api/fixtures', (_req, res) => res.json({ scenarios }));
+  app.get('/api/fixtures', (_req, res) => res.json({
+    scenarios,
+    manifest: {
+      verified: demo.integrity?.verified === true,
+      asset_count: demo.integrity?.entries.length ?? 0,
+      assets: (demo.integrity?.entries ?? []).map(({ id, path: p, sha256, kind, scenario }) => (
+        { id, path: p, sha256, kind, scenario })),
+    },
+  }));
   app.get('/api/wines', (_req, res) => res.json({ wines: store.listWines() }));
   app.get('/api/wines/:id', (req, res) => {
     const wine = store.getWine(req.params.id);
@@ -48,8 +63,8 @@ export function createApp(demo = buildDemo()) {
       });
       return res.json(result);
     } catch (e) {
-      return res.status(e?.code === 'unknown_fixture' ? 404 : 400)
-        .json({ error: e?.code ?? 'scan_failed' });
+      const status = e?.code === 'unknown_fixture' ? 404 : e?.status ?? 400;
+      return res.status(status).json({ error: e?.code ?? 'scan_failed' });
     }
   });
   app.post('/api/reset', (_req, res) => {

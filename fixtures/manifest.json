@@ -143,7 +143,7 @@
     {
       "id": "catalog",
       "path": "fixtures/catalog.json",
-      "sha256": "e5985d1d42cfda6e0032eeed7d78956bf7c64625f7241b2c53ad7f9fff045306",
+      "sha256": "8206ad88b7b2f9d8cf3a04a4e7945fb2e14707128ce7c676497695cce295f52f",
       "kind": "catalog",
       "creator": "C/Pi (demo author)",
       "creation_method": "authored JSON",

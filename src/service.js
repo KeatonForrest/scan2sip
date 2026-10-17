@@ -21,10 +21,20 @@ export function createService({ store, model, now = () => new Date() }) {
       throw err;
     }
 
-    // Idempotent replay: same request_id returns the recorded result and
-    // creates nothing new — including for retained timeout reservations.
+    // Idempotent replay: same request_id + same fixture returns the
+    // recorded result and creates nothing new — including for retained
+    // timeout reservations. The same request_id with a DIFFERENT fixture
+    // is a conflict, never a replay of another bottle's result.
     const prior = store.getRequest(request_id);
-    if (prior) return { ...prior.result, replayed: true };
+    if (prior) {
+      if (prior.fixture_id !== fixture_id) {
+        const err = new Error('request_conflict');
+        err.code = 'request_conflict';
+        err.status = 409;
+        throw err;
+      }
+      return { ...prior.result, replayed: true };
+    }
 
     const created_at = now().toISOString();
     let result;

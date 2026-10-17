@@ -3,46 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>scan2sip — synthetic fixture demo</title>
+<title>scan2sip — from a bottle to an answer you can inspect</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="banner">
-  <strong>Synthetic fixture demo</strong> — fictional wines and authored model
-  responses. No credentials, no provider calls. Simulated provider output;
-  provider latency <strong>N/A</strong>. AI-generated fixture notes are never
-  producer-verified. Review/publication and chat arrive in a later milestone.
+<header class="badgebar">
+  <span class="badge">Synthetic fixture demo</span>
+  <span>Fictional wines · authored model responses · no credentials or provider calls · provider latency N/A</span>
+  <details class="badge-more">
+    <summary>What is real here?</summary>
+    <p>Matching, uncertainty handling, deduplication and per-field attribution
+    run as real local code. The model outputs are authored fixtures, not
+    provider recordings or accuracy evidence. An AI-generated fixture note is
+    never producer-verified. Ingestion, review/publication and chat arrive in
+    a later milestone.</p>
+  </details>
 </header>
+
 <main>
-  <h1>scan<span>2</span>sip</h1>
-  <p class="sub">Bottle label → identity → exact match or visible uncertainty → attributed details.</p>
-
-  <section>
-    <h2>1 · Pick a fixture label</h2>
-    <div id="scenarios" class="grid"></div>
-  </section>
-
-  <section>
-    <h2>2 · Scan</h2>
-    <div class="row">
-      <button id="scanBtn" disabled>Scan selected label</button>
-      <button id="replayBtn" disabled>Replay same request</button>
-      <button id="rescanBtn" disabled>Deliberate rescan (new request)</button>
-      <button id="resetBtn">Reset workspace</button>
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>From a bottle to an answer<br>you can <em>inspect</em>.</h1>
+      <p class="lead">Scan a label. Get an exact match — or an honest
+      “we don't know yet” — with every fact tied to its evidence.</p>
+      <div class="samples" role="group" aria-label="Sample labels">
+        <button class="sample sel" data-fixture="scan-orchard-2021">Known bottle · 2021</button>
+        <button class="sample" data-fixture="scan-orchard-2022-mismatch">Different vintage · 2022</button>
+        <button class="sample" data-fixture="scan-blurred-orchard">Blurred label · uncertain</button>
+      </div>
+      <button id="scanBtn" class="primary">Scan this bottle</button>
     </div>
-    <pre id="result" aria-live="polite">Select a label to begin.</pre>
+
+    <figure class="bottle-stage" aria-label="Selected synthetic bottle">
+      <svg class="bottle" viewBox="0 0 200 460" role="img" aria-labelledby="bottleTitle">
+        <title id="bottleTitle">Original synthetic bottle presentation</title>
+        <path d="M82 12 h36 v58 c0 14 26 26 26 52 v300 a26 26 0 0 1 -26 26 h-36 a26 26 0 0 1 -26 -26 v-300 c0 -26 26 -38 26 -52 z" fill="#232d20" stroke="#4a5a44" stroke-width="2"/>
+        <rect x="80" y="4" width="40" height="18" rx="3" fill="#8a6f3c"/>
+        <image id="bottleLabel" href="/fixtures/labels/label-orchard-2021.svg" x="45" y="150" width="110" height="154" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <figcaption id="bottleCaption">Orchard Lantern · Hillside Red · 2021 (synthetic)</figcaption>
+    </figure>
+
+    <section class="outcome" aria-live="polite">
+      <span id="outcomeChip" class="chip chip-idle">Ready</span>
+      <h2 id="outcomeTitle">Pick a sample, then scan.</h2>
+      <p id="outcomeText">The result will say plainly whether the bottle
+      matched the catalog, and what — if anything — was recorded.</p>
+      <div id="wineFacts"></div>
+    </section>
   </section>
 
-  <section>
-    <h2>3 · Attributed details</h2>
-    <div id="wine">No matched wine yet.</div>
-  </section>
-
-  <section>
-    <h2>Local research demand <small>(unmatched / uncertain scans only — never catalog facts)</small></h2>
-    <div id="demands">None.</div>
-  </section>
+  <details class="inspector">
+    <summary>Inspector — all scenarios, replay diagnostics, raw JSON</summary>
+    <div class="inspector-body">
+      <h3>All fixture scenarios</h3>
+      <div id="scenarios" class="grid"></div>
+      <div class="row">
+        <button id="replayBtn" disabled>Replay same request</button>
+        <button id="rescanBtn" disabled>Deliberate rescan (new request)</button>
+        <button id="resetBtn">Reset workspace</button>
+      </div>
+      <h3>Raw result</h3>
+      <pre id="result">Nothing scanned yet.</pre>
+      <h3>Local research demand <small>— unmatched / uncertain scans only; never catalog facts</small></h3>
+      <pre id="demands">None.</pre>
+    </div>
+  </details>
 </main>
+<footer>scan2sip · local fixture showcase · unknown means unknown — a missing vintage is never shown as a year or as “NV”.</footer>
 <script src="app.js"></script>
 </body>
 </html>

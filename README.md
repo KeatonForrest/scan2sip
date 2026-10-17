@@ -22,9 +22,8 @@ checkpoints; they are described in `docs/CONTRACT.md` but not implemented yet.
 
 ## Decisions and defaults (all reversible)
 
-- Runtime: **Node 24** (pinned, supported LTS line; see `docs/CONTRACT.md`
-  for the exact tested version). This demo does not change any other
-  project's runtime requirements.
+- Runtime: **Node 24.22.0** (pinned, tested; `.nvmrc`). This demo does
+  not change any other project's runtime requirements.
 - Server: Express; UI: small vanilla browser interface; store: one local
   SQLite file via the built-in `node:sqlite` module (no database service,
   no native npm build). If that API proves unsuitable on a target platform,
@@ -36,9 +35,11 @@ checkpoints; they are described in `docs/CONTRACT.md` but not implemented yet.
 
 ## Run (milestone 1)
 
+Use Node **24.22.0** (see `.nvmrc`; e.g. `nvm use`):
+
 ```bash
 npm ci            # or: npm install
-npm test          # offline fixture checks (Node 24)
+npm test          # offline fixture checks (Node 24.22.0)
 npm start         # local demo at http://127.0.0.1:4173
 ```
 

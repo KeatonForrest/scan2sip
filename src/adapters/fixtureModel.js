@@ -15,8 +15,12 @@ export class FixtureTimeoutError extends Error {
   }
 }
 
-export function loadFixtureModel(responsesPath) {
-  const table = JSON.parse(fs.readFileSync(responsesPath, 'utf8'));
+export function loadFixtureModel(responsesSource) {
+  // Accepts either a path (standalone use) or an already integrity-
+  // verified responses table (normal server path).
+  const table = typeof responsesSource === 'string'
+    ? JSON.parse(fs.readFileSync(responsesSource, 'utf8'))
+    : responsesSource;
   return {
     /** @returns {object} raw identification payload (possibly malformed, by design) */
     identify(fixtureId) {
