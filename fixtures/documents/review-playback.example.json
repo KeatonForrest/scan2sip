@@ -1,0 +1,19 @@
+{
+  "note": "SIMULATED REVIEW PLAYBACK — illustrative only. This is not an actual independent review and must never be presented as one. A claim of independent acceptance requires the actual independent reviewer to inspect the source quotes and supply/approve the exact artifact (bound as below) separately.",
+  "schema": "scan2sip-review-v1",
+  "kind": "playback",
+  "artifact_sha256": "<bound at staging to the staged artifact digest>",
+  "catalog_snapshot_sha256": "<bound at staging to the catalog snapshot digest>",
+  "reviewer_ref": "playback-reviewer (simulated)",
+  "curator_ref": "demo-operator",
+  "reviewed_at": "2026-10-01T00:00:00.000Z",
+  "review_before": "2026-12-30T00:00:00.000Z",
+  "decisions": {
+    "region": "accept",
+    "varietal": "accept",
+    "producer_info": "accept",
+    "food_pairings": "reject",
+    "tasting_notes": "hold"
+  },
+  "expected_outcome": "Accepted supported fields publish; the unsupported food pairing is rejected and never publishes; the held/absent tasting note remains unknown."
+}

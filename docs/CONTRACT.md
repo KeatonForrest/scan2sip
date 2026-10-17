@@ -106,6 +106,105 @@ production data or credentials of any kind; automatic retries.
 - `GET /api/demands` — deduplicated local research demand.
 - `POST /api/reset` — reseed the disposable fixture workspace (local only).
 
+## Milestone 2 — synthetic HTML ingestion, review, publication, chat (packet for review; not yet implemented)
+
+One walkthrough: scan the unknown fictional Glassfinch Aurelia White 2018
+→ open its synthetic producer sheet → stage quoted facts → review
+accept/reject/hold per field → exact-identity deduplication → atomic
+local publication + retrieval update → rescan matches → ask the wine a
+question answered from its published revision with source quotes.
+
+### Source evidence (actual local sheets, supplied with this packet)
+
+- `fixtures/documents/orchard-lantern-hillside-red.html`,
+  `coppermoth-ridge-pinot.html`, `sable-and-fern-meadow-white.html` —
+  the real local sheets behind the existing seed `fixture://…-sheet`
+  source labels; every seed quote in `fixtures/catalog.json` appears
+  verbatim in its sheet.
+- `fixtures/documents/glassfinch-aurelia-white.html` — the new ingestion
+  example. `glassfinch-aurelia-white-undated.html` — the missing-vintage
+  variant (no year stated, no explicit no-vintage statement).
+- `fixtures/documents/proposals.json` — authored simulated extractor
+  proposals. Glassfinch proposes region/varietal/producer_info with
+  verbatim quotes, a food pairing whose supporting quote is **absent**
+  (must be rejected), and no tasting note (stays unknown).
+
+### Staging and review rules
+
+- Staging validates each field's `supporting_text` verbatim against the
+  document text and each identity quote likewise (at least one identity
+  quote must contain the vintage for a year-specific identity).
+  Field-level support is computed (`supported` / `unsupported`); an
+  unsupported field can never be accepted or published.
+- An undated identity with no explicit no-vintage statement is **held**:
+  no year is invented. A wine may publish with `vintage: null` only when
+  the source explicitly states no vintage (as the Sable & Fern sheet
+  does for its seed record).
+- Review is per-field `accept | reject | hold`, bound to
+  `artifact_sha256`, `catalog_snapshot_sha256`, accepted fields,
+  `reviewer_ref` ≠ `curator_ref`/operator, `reviewed_at`, and
+  `review_before`. Changed artifact, snapshot, or plan, or an expired
+  review, refuses publication.
+- **Playback vs. actual review:** the supplied
+  `review-playback.example.json` is simulated playback, labeled as such
+  in data and UI; local demo publication from playback is labeled
+  “simulated review playback”. Independent acceptance exists only when
+  the actual independent reviewer inspects the quotes and supplies/
+  approves the exact artifact separately — this packet deliberately
+  contains no such approval.
+- **Deterministic review expiry:** fixture reviews use fixed fixture
+  timestamps (reviewed 2026-10-01, `review_before` 2026-12-30) checked
+  against a pinned workspace demo clock, never wall-clock time, so
+  recordings and tests are reproducible. An expired-review case is
+  demonstrated only by explicitly advancing the demo clock in a
+  scenario, deterministically.
+
+### Publication, deduplication, retrieval (atomic)
+
+- Publication is one SQLite transaction: insert-or-dedupe the wine by
+  canonical identity + exact vintage (unique key), write the immutable
+  publication record under a unique `plan_digest`, and replace that
+  wine's knowledge rows at the new revision. Partial publication is
+  impossible; failures roll back and are surfaced, never swallowed.
+- Re-importing the same document, or publishing an identity that
+  already exists (e.g. the Orchard 2021 sheet), deduplicates to the
+  existing wine — no second record, no silent field overwrite.
+- Existing AI-generated fixture notes stay `AI-generated fixture`
+  forever; publication never upgrades them. Unmatched/provisional scans
+  still never publish.
+
+### Proposed interfaces (milestone 2, for review)
+
+- `POST /api/documents { document_id, request_id }` → staged artifact
+  `{ artifact_id, artifact_sha256, identity, fields: [{ field, value,
+  support, quotes }], status: staged | held, reason? }`. Same
+  `request_id` + same document replays idempotently; same `request_id`
+  with a different document is `409 request_conflict` (scan rules).
+- `GET /api/artifacts/:id` — staged artifact with per-field support.
+- `POST /api/artifacts/:id/review { review }` — imports a review
+  artifact (playback or independently supplied), validates binding,
+  snapshot, expiry (demo clock), and curator/reviewer separation.
+- `POST /api/publications { artifact_id, request_id }` →
+  `{ plan_digest, wine_id, revision, status: published |
+  already_published }`; replay/conflict rules as for scans.
+- `GET /api/wines/:id` gains `revision` and knowledge-backed fields.
+- `POST /api/chat { wine_id, question, request_id }` →
+  `{ answer, citations: [{ field, source_id, quote }],
+  evidence_status: answered | unknown, mode: "fixture",
+  provider_latency: "N/A" }`, composed deterministically from the
+  exact published wine revision's knowledge rows only. Supported
+  questions map to published fields; absent evidence answers unknown.
+  Authored fixture answers are labeled simulated everywhere; no live-AI
+  impression, no general chat, no cross-wine facts.
+- Store additions: `artifacts`, `reviews`, `publications`,
+  `knowledge_rows (wine_id, revision, field, value, source_id, quote)`
+  with unique `(identity_key, vintage)`, unique `plan_digest`, and
+  unique `(wine_id, revision, field)` constraints.
+- UI: one “Evidence flow” panel (document → staged quotes → review
+  decisions → publication result) and an “Ask this wine” panel on the
+  matched-wine outcome. No dashboard/auth/framework additions; the
+  polished scan flow is unchanged.
+
 ## Runtime
 
 - Node **24.22.0** is the pinned, tested runtime (`.nvmrc`,
