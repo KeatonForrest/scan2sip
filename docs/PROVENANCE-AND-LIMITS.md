@@ -10,7 +10,7 @@ and model responses are fictional and authored for this demo; no real
 producer names, logos, photography, copied prose, retailer data, or
 production catalog exports are included. One file is externally
 authored: the independently reviewed Glassfinch review artifact
-(S/Codex), copied byte-identical and pinned by canonical digest.
+(the independent reviewer, a separate AI reviewer referred to as “S”), copied byte-identical and pinned by canonical digest.
 
 ## Code provenance
 

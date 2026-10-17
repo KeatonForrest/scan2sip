@@ -16,6 +16,12 @@ real local code. One review artifact (Glassfinch) has been
 independently reviewed and hash-pinned; all other review in the demo
 is clearly labeled simulated playback.
 
+[![Walkthrough preview — an actual frame from the recording](demo/preview.png)](demo/scan2sip-walkthrough.mp4)
+
+**[Watch the 65-second walkthrough](demo/scan2sip-walkthrough.mp4)**
+(recorded from the actual Chrome UI on synthetic fixtures; chapter
+list and provenance in [`demo/README.md`](demo/README.md)).
+
 ## Run it
 
 Requires **Node 24.22.0** (`.nvmrc`; `nvm use` works):
@@ -42,7 +48,9 @@ state is one disposable SQLite file under `data/` (reset from the UI).
 3. **Scan the unknown Glassfinch**, then open the **Evidence flow**:
    view its local source sheet, stage it (the grilled-peaches pairing
    is visibly *unsupported*), and play the simulated review — or load
-   the S-approved review — and publish.
+   the independently reviewed artifact (reviewed by a separate AI
+   reviewer, “S”, who checked the synthetic source and its bindings —
+   not human producer verification) — and publish.
 4. **Rescan the Glassfinch** → it now matches; **Ask this wine** where
    it's from and what grape it is (cited, exact revision), then ask
    about food pairing (honest unknown).

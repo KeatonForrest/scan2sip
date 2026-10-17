@@ -41,6 +41,6 @@ SDK calls, retry helpers, database models/schemas, capture archives,
 catalog data, evaluation datasets, and any private planning documents.
 The one externally authored file in the tree is the independently
 reviewed Glassfinch artifact
-(`fixtures/documents/approved-glassfinch-review.json`, S/Codex), copied
+(`fixtures/documents/approved-glassfinch-review.json`, by the independent reviewer “S”, a separate AI reviewer), copied
 byte-identical from the reviewer's public-safe export and recorded in
 the fixture manifest.

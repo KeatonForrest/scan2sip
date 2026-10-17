@@ -162,7 +162,7 @@ question answered from its published revision with source quotes.
   “simulated review playback”. A caller-supplied `kind: "independent"`
   or a different `reviewer_ref` string is **not** independent approval:
   a review carries independently-reviewed status only when its exact
-  digest matches an S-reviewed, hash-pinned artifact recorded in the
+  digest matches an independently reviewed, hash-pinned artifact (reviewer “S”, a separate AI reviewer who checked the synthetic source and bindings) recorded in the
   demo configuration. One such artifact now exists: the Glassfinch
   review (`fixtures/documents/approved-glassfinch-review.json`,
   canonical digest pinned server-side), independently approved after

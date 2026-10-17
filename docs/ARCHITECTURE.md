@@ -33,7 +33,7 @@ flowchart LR
   An unsupported field can never be accepted or published.
 - **Review status is earned, not declared.** A review is
   independently-reviewed only when its canonical digest equals the
-  server-side pin of the exact S-approved artifact
+  server-side pin of the exact independently reviewed artifact (a separate AI reviewer, “S”, checked the synthetic source and bindings)
   (`PINNED_INDEPENDENT_REVIEW_DIGEST`). Everything else is labeled
   simulated playback, and that classification travels with published
   fields, knowledge rows, and chat citations.

@@ -1,0 +1,58 @@
+{
+  "revision": "5ed7a7a944ed4686d607a960ffb5aad88387e53c",
+  "mode": "synthetic-fixture",
+  "provider_calls": 0,
+  "provider_latency": "N/A",
+  "capture": "Actual Chrome viewport, scripted UI interactions, live capture timestamps; captions added for this recording; no audio.",
+  "duration_seconds": 64.75989799999999,
+  "chapters": [
+    {
+      "at_seconds": 0,
+      "title": "From a bottle to an answer you can inspect."
+    },
+    {
+      "at_seconds": 4.1,
+      "title": "An exact match keeps each fact’s source status."
+    },
+    {
+      "at_seconds": 9.1,
+      "title": "A different vintage is a different wine. No silent substitution."
+    },
+    {
+      "at_seconds": 14.2,
+      "title": "A blurred identity stays uncertain—even when a similar wine exists."
+    },
+    {
+      "at_seconds": 19.2,
+      "title": "Glassfinch is unknown. A scan creates research demand, not catalog facts."
+    },
+    {
+      "at_seconds": 24.3,
+      "title": "Stage an original synthetic source: inspect quotes; reject unsupported pairing."
+    },
+    {
+      "at_seconds": 31.4,
+      "title": "Load the exact independently reviewed artifact. This is synthetic-source review."
+    },
+    {
+      "at_seconds": 37.4,
+      "title": "Publish once: the catalog and retrieval knowledge update together."
+    },
+    {
+      "at_seconds": 42.5,
+      "title": "Rescan the same bottle. It now matches the reviewed knowledge."
+    },
+    {
+      "at_seconds": 47.6,
+      "title": "Ask this wine: Albariño, with a quote and the stored review classification."
+    },
+    {
+      "at_seconds": 53.7,
+      "title": "No accepted pairing evidence? The answer stays unknown."
+    },
+    {
+      "at_seconds": 58.7,
+      "title": "Explore fictional regions and vintages using the same attributed catalog."
+    }
+  ]
+}
