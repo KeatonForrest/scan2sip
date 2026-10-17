@@ -255,7 +255,7 @@
     {
       "id": "doc-proposals",
       "path": "fixtures/documents/proposals.json",
-      "sha256": "fe013c030911d6cdf566ceddd9f81e65110d48fa3e311ddb610af57a364b2ead",
+      "sha256": "95c7a755a9339beb6b2fa3ff42d7d66e2270c42b1179d07de5f9b28ca51d7c5b",
       "kind": "model-response",
       "creator": "C/Pi (demo author)",
       "creation_method": "authored JSON",
