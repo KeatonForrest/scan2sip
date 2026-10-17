@@ -74,9 +74,9 @@ everything else is its transitive tree or dev tooling recorded in the lock.
 
 ## License notice handling
 
-- This project itself has **no `LICENSE` file yet**; its license is
-  decided only at the final rights review before any public release.
-  Nothing in this inventory grants rights in this project's own code.
+- This project itself is released under the **MIT License**
+  (Copyright (c) 2026 Keaton Forrest) — see `LICENSE` at the
+  repository root for the rights it grants in this project's own code.
 - Third-party packages remain under their own licenses as listed
   above. Any distributed release must retain the packages' copyright
   and license notices (for MIT/ISC/BSD-style licenses, include the

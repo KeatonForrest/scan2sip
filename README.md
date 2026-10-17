@@ -83,5 +83,6 @@ browser tests skip cleanly where Chrome is unavailable, so counts in
 other environments may show skips — final counts are confirmed at
 release review). This repository is a portfolio showcase, not a
 product: no hosting, accounts, live providers, or paid calls. Its own
-license is intentionally undecided until the final rights review —
-no `LICENSE` file yet, and none should be assumed.
+license: **MIT** (Copyright (c) 2026 Keaton Forrest) — see
+[`LICENSE`](LICENSE). Third-party dependency licenses are inventoried
+in [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md).

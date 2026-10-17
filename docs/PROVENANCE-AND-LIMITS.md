@@ -22,17 +22,17 @@ repository.
 
 ## Release limits (current state)
 
-- **Not yet a public release.** No `LICENSE` file exists for this
-  project's own code; the license is decided at the final rights
-  review. Dependency licenses and notice handling are inventoried in
-  `docs/DEPENDENCIES.md`.
+- **License:** this project's own code is released under the MIT
+  License (Copyright (c) 2026 Keaton Forrest) — see `LICENSE` at the
+  repository root. Dependency licenses and notice handling are
+  inventoried in `docs/DEPENDENCIES.md`.
 - **Fixture claims only.** Evaluation and tests demonstrate functional
   behavior against authored fixtures. They are not model-accuracy,
   provider-performance, latency, or search-quality evidence; provider
   latency is reported as N/A throughout.
 - **Local only.** No hosting, accounts, crawling, PDF/OCR, vectors,
   live providers, or paid calls are implemented or implied.
-- A public release requires, in order: final rights/license review,
-  regeneration of the dependency inventory from the exact lock,
-  fixture-manifest and screenshot/recording review of the exact
+- The public release followed: final rights/license review (MIT,
+  above), regeneration of the dependency inventory from the exact
+  lock, fixture-manifest and screenshot/recording review of the exact
   package, and the owner's explicit publication approval.

@@ -11,8 +11,8 @@ provenance are distinguished below:
   demo with no counterpart copied or adapted.
 
 That private codebase is not included, linked, or required at build or
-run time, and final licensing of this demo is deferred until a rights
-review — this inventory is the provenance record for that review.
+run time. This demo is released under the MIT License (see `LICENSE`);
+this inventory is the provenance record behind that release.
 
 ## Behavioral adaptations
 
