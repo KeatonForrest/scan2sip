@@ -4,8 +4,9 @@
 //
 // Covers the UI correlation contract: selection clears prior wine,
 // mismatch/failure never leave stale facts, replay stays bound to the
-// original request, a late scan response is suppressed, and an outdated
-// reset completion cannot clear a newer result (nor claim success).
+// original request, a late scan response is suppressed, an outdated
+// reset completion cannot clear a newer result, and a failed reset
+// preserves current facts without claiming success.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -23,10 +24,11 @@ const CHROME_CANDIDATES = [
   '/usr/bin/chromium-browser',
 ].filter(Boolean);
 const chromeBin = CHROME_CANDIDATES.find((p) => fs.existsSync(p));
+const skip = chromeBin ? false : 'no Chrome binary found (set CHROME_BIN)';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-test('browser: correlated UI state, stale-wine and reset-race regressions', { skip: chromeBin ? false : 'no Chrome binary found (set CHROME_BIN)' }, async () => {
+async function withBrowser(fn) {
   const demo = buildDemo({ dbPath: ':memory:' });
   const server = createApp(demo).listen(0, '127.0.0.1');
   await new Promise((r) => server.once('listening', r));
@@ -76,12 +78,28 @@ test('browser: correlated UI state, stale-wine and reset-race regressions', { sk
       }
       assert.fail(`timeout waiting for ${label}`);
     };
-
     await waitFor(`document.querySelectorAll('.card').length === 10`, 'UI load');
+    await fn({ evaluate, waitFor });
+  } finally {
+    try { ws?.close(); } catch {}
+    chrome.kill();
+    server.close();
+    await sleep(300);
+    try {
+      fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    } catch { /* temp profile cleanup is best-effort */ }
+  }
+}
 
+async function scanKnownMatch(evaluate, waitFor) {
+  await evaluate(`document.querySelector('.sample[data-fixture="scan-orchard-2021"]').click(); document.getElementById('scanBtn').click(); true`);
+  await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match') && document.getElementById('wineFacts').textContent.includes('Syrah')`, 'match rendered');
+}
+
+test('browser: correlated UI state, stale-wine and reset-race regressions', { skip }, async () => {
+  await withBrowser(async ({ evaluate, waitFor }) => {
     // Match, then mismatch: no stale wine facts at any point.
-    await evaluate(`document.querySelector('.sample[data-fixture="scan-orchard-2021"]').click(); document.getElementById('scanBtn').click(); true`);
-    await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match') && document.getElementById('wineFacts').textContent.includes('Syrah')`, 'match rendered');
+    await scanKnownMatch(evaluate, waitFor);
     await evaluate(`document.querySelector('.sample[data-fixture="scan-orchard-2022-mismatch"]').click(); true`);
     assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), false, 'selection clears prior wine');
     await evaluate(`document.getElementById('scanBtn').click(); true`);
@@ -96,8 +114,7 @@ test('browser: correlated UI state, stale-wine and reset-race regressions', { sk
     // Reset race: hold the reset RESPONSE after the server applied it,
     // complete a NEW scan, then release the old reset — the newer match
     // must survive.
-    await evaluate(`document.querySelector('.sample[data-fixture="scan-orchard-2021"]').click(); document.getElementById('scanBtn').click(); true`);
-    await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`, 'second match rendered');
+    await scanKnownMatch(evaluate, waitFor);
     await evaluate(`(() => {
       const originalFetch = window.fetch.bind(window);
       window.__releaseReset = null;
@@ -119,13 +136,25 @@ test('browser: correlated UI state, stale-wine and reset-race regressions', { sk
     await sleep(400);
     assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`), true, 'outdated reset must not clear the newer match');
     assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), true, 'newer wine facts survive the outdated reset');
-  } finally {
-    try { ws?.close(); } catch {}
-    chrome.kill();
-    server.close();
-    await sleep(300);
-    try {
-      fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-    } catch { /* temp profile cleanup is best-effort */ }
-  }
+  });
+});
+
+test('browser: failed reset (HTTP 500) preserves current facts and claims no success', { skip }, async () => {
+  await withBrowser(async ({ evaluate, waitFor }) => {
+    await scanKnownMatch(evaluate, waitFor);
+    // Force /api/reset to fail with HTTP 500 in the page.
+    await evaluate(`(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = (url, opts) => String(url).includes('/api/reset')
+        ? Promise.resolve(new Response('simulated reset failure', { status: 500 }))
+        : originalFetch(url, opts);
+      return true;
+    })()`);
+    await evaluate(`document.getElementById('resetBtn').click(); true`);
+    await waitFor(`!document.getElementById('resetError').hidden && document.getElementById('resetError').textContent.includes('Reset failed')`, 'reset error shown');
+    assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`), true, 'no reset-success claim replaces the match');
+    assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Workspace reset')`), false, 'no reset-success claim');
+    assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), true, 'current wine facts remain after failed reset');
+    assert.equal(await evaluate(`document.getElementById('replayBtn').disabled`), false, 'lastScan/replay binding preserved after failed reset');
+  });
 });

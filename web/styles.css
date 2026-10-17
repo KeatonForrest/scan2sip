@@ -31,6 +31,7 @@ h1 em { color:var(--accent); font-style:italic; }
 .status.warn, .unknown { color:var(--warn); }
 blockquote { width:100%; margin:4px 0 4px 142px; color:var(--muted); border-left:3px solid var(--accent); padding-left:10px; }
 .nofacts { font-style:italic; }
+.reset-error { color:var(--bad); border:1px solid var(--bad); border-radius:8px; padding:8px 12px; }
 .inspector { margin-top:34px; border:1px solid var(--line); border-radius:14px; padding:16px 20px; }
 .inspector summary { cursor:pointer; font-size:17px; color:var(--accent); }
 .inspector-body { padding-top:8px; }

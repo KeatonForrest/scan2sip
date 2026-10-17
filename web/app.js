@@ -27,6 +27,8 @@ function clearOutcome(title = 'Pick a sample, then scan.', text = 'The result wi
   $('outcomeChip').className = 'chip chip-idle';
   $('outcomeTitle').textContent = title;
   $('outcomeText').textContent = text;
+  $('resetError').hidden = true;
+  $('resetError').textContent = '';
   $('wineFacts').innerHTML = '';
 }
 
@@ -157,9 +159,12 @@ $('resetBtn').addEventListener('click', async () => {
     if (!response.ok) throw new Error(`reset_http_${response.status}`);
   } catch (e) {
     if (token !== generation) return;
-    clearOutcome('Reset failed', `The workspace could not be reset (${e.message}). Current results were left as they are.`);
-    $('outcomeChip').textContent = 'Failed';
-    $('outcomeChip').className = 'chip chip-failed';
+    // Preserve the current result exactly: wine facts, lastScan and the
+    // replay binding stay untouched; the error is shown separately and
+    // never as a reset success.
+    const resetError = $('resetError');
+    resetError.textContent = `Reset failed (${e.message}). Current results were left as they are.`;
+    resetError.hidden = false;
     return;
   }
   if (token !== generation) return; // Outdated reset: a newer state owns the UI.
