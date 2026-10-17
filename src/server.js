@@ -25,18 +25,19 @@ export function buildDemo({
   store.seedWines(catalog.wines);
   const model = loadFixtureModel(integrity.responses);
   const service = createService({ store, model });
-  return { store, service, catalog, integrity };
+  return { store, service, catalog, integrity, fixturesRoot };
 }
 
 export function createApp(demo = buildDemo()) {
   const { store, service } = demo;
-  const scenarios = JSON.parse(
-    fs.readFileSync(path.join(fixturesDir, 'scenarios.json'), 'utf8'),
-  ).scenarios;
+  // Everything fixture-derived comes from the verified snapshot/root of
+  // this demo instance — never from a default path read a second time.
+  const scenarios = demo.integrity?.scenarios
+    ?? JSON.parse(fs.readFileSync(path.join(demo.fixturesRoot, 'scenarios.json'), 'utf8')).scenarios;
 
   const app = express();
   app.use(express.json());
-  app.use('/fixtures', express.static(fixturesDir));
+  app.use('/fixtures', express.static(demo.fixturesRoot));
   app.use(express.static(path.join(root, 'web')));
 
   app.get('/api/fixtures', (_req, res) => res.json({

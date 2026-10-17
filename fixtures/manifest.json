@@ -172,7 +172,7 @@
       "id": "scenarios",
       "path": "fixtures/scenarios.json",
       "sha256": "1845fc4141cba7d838f6ff0379538bb7835a99e7bb41e6dab176174e0713183f",
-      "kind": "catalog",
+      "kind": "scenario-index",
       "creator": "C/Pi (demo author)",
       "creation_method": "authored JSON",
       "synthetic": true,

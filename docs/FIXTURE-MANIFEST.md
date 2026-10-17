@@ -11,7 +11,7 @@ synthetic documents and review artifacts) has one entry in
 | `id` | Stable fixture identifier used by the API and checks. |
 | `path` | Repository-relative path of the asset. |
 | `sha256` | SHA-256 of the file bytes at manifest-writing time. |
-| `kind` | `label-image` \| `catalog` \| `model-response` \| `document` \| `review-artifact`. |
+| `kind` | `label-image` \| `catalog` \| `model-response` \| `scenario-index` \| `document` \| `review-artifact`. |
 | `creator` | Who created the asset (person/tool). |
 | `creation_method` | How it was made (e.g. "hand-authored SVG", "authored JSON"). |
 | `synthetic` | Always `true` in this repository. |

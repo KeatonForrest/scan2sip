@@ -145,6 +145,117 @@ test('fixture integrity: tampered label bytes fail startup; intact fixtures veri
   assert.ok(ok.integrity.entries.length >= 10);
 });
 
+async function copyFixtures(mutate) {
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const crypto = await import('node:crypto');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'scan2sip-fixtures-'));
+  const fixturesCopy = path.join(tmp, 'fixtures');
+  fs.cpSync(path.join(root, 'fixtures'), fixturesCopy, { recursive: true });
+  const manifestPath = path.join(fixturesCopy, 'manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const rehash = (relPath) => {
+    const entry = manifest.assets.find((e) => e.path === relPath);
+    if (entry) entry.sha256 = crypto.createHash('sha256').update(fs.readFileSync(path.join(tmp, relPath))).digest('hex');
+  };
+  const save = () => fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  mutate({ fs, tmp, fixturesCopy, manifest, rehash, save });
+  save();
+  return fixturesCopy;
+}
+
+for (const omitted of ['fixtures/responses.json', 'fixtures/catalog.json', 'fixtures/scenarios.json']) {
+  test(`fixture integrity: omitted manifest entry for ${omitted} fails startup`, async () => {
+    const fixturesCopy = await copyFixtures(({ manifest }) => {
+      manifest.assets = manifest.assets.filter((e) => e.path !== omitted);
+    });
+    assert.throws(
+      () => buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy }),
+      (e) => e.code === 'fixture_integrity_failed' && e.detail.includes(omitted),
+    );
+  });
+}
+
+test('fixture integrity: duplicate manifest path is rejected', async () => {
+  const fixturesCopy = await copyFixtures(({ manifest }) => {
+    const dup = { ...manifest.assets.find((e) => e.path === 'fixtures/responses.json'), id: 'model-responses-copy' };
+    manifest.assets.push(dup);
+  });
+  assert.throws(
+    () => buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy }),
+    (e) => e.code === 'fixture_integrity_failed' && e.detail.includes('duplicate'),
+  );
+});
+
+test('fixture integrity: changed authored response without manifest entry cannot be consumed', async () => {
+  // The exact defect from re-review: drop the responses entry AND edit
+  // the authored producer; startup must fail, never consume it.
+  const fixturesCopy = await copyFixtures(({ fs, fixturesCopy: dir, manifest }) => {
+    manifest.assets = manifest.assets.filter((e) => e.path !== 'fixtures/responses.json');
+    const responsesPath = path.join(dir, 'responses.json');
+    const responses = JSON.parse(fs.readFileSync(responsesPath, 'utf8'));
+    responses['scan-orchard-2021'].raw.producer = 'Tampered Producer';
+    fs.writeFileSync(responsesPath, JSON.stringify(responses, null, 2));
+  });
+  assert.throws(
+    () => buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy }),
+    (e) => e.code === 'fixture_integrity_failed',
+  );
+});
+
+test('fixture integrity: scenario label re-bound to another file is rejected', async () => {
+  const fixturesCopy = await copyFixtures(({ manifest }) => {
+    const entry = manifest.assets.find((e) => e.id === 'label-scan-orchard-2021');
+    entry.path = 'fixtures/labels/label-orchard-2022.svg';
+  });
+  // Recompute the moved entry's hash honestly so only the binding is wrong.
+  const fs = await import('node:fs');
+  const crypto = await import('node:crypto');
+  const manifestPath = path.join(fixturesCopy, 'manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const entry = manifest.assets.find((e) => e.id === 'label-scan-orchard-2021');
+  entry.sha256 = crypto.createHash('sha256')
+    .update(fs.readFileSync(path.join(fixturesCopy, 'labels', 'label-orchard-2022.svg'))).digest('hex');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  assert.throws(
+    () => buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy }),
+    (e) => e.code === 'fixture_integrity_failed' && e.detail.includes('label'),
+  );
+});
+
+test('fixture integrity: malformed manifest entry fails cleanly', async () => {
+  const fixturesCopy = await copyFixtures(({ manifest }) => {
+    delete manifest.assets[0].sha256;
+  });
+  assert.throws(
+    () => buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy }),
+    (e) => e.code === 'fixture_integrity_failed',
+  );
+});
+
+test('createApp serves the verified custom fixtures root, not defaults', async () => {
+  const fixturesCopy = await copyFixtures(({ fs, fixturesCopy: dir, rehash }) => {
+    const scenariosPath = path.join(dir, 'scenarios.json');
+    const doc = JSON.parse(fs.readFileSync(scenariosPath, 'utf8'));
+    doc.scenarios[0].title = 'CUSTOM ROOT MARKER';
+    fs.writeFileSync(scenariosPath, JSON.stringify(doc, null, 2));
+    rehash('fixtures/scenarios.json');
+  });
+  const demo = buildDemo({ dbPath: ':memory:', fixturesDir: fixturesCopy });
+  const app = createApp(demo);
+  const server = app.listen(0, '127.0.0.1');
+  await new Promise((r) => server.once('listening', r));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const fixtures = await (await fetch(`${base}/api/fixtures`)).json();
+    assert.equal(fixtures.scenarios[0].title, 'CUSTOM ROOT MARKER');
+    const label = await fetch(`${base}/fixtures/labels/label-orchard-2021.svg`);
+    assert.equal(label.status, 200);
+  } finally {
+    server.close();
+  }
+});
+
 test('HTTP shape: flat scan result and verified manifest metadata', async () => {
   const demo = buildDemo({ dbPath: ':memory:' });
   const app = createApp(demo);
