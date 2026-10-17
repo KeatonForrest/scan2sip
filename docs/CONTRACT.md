@@ -132,14 +132,21 @@ question answered from its published revision with source quotes.
 ### Staging and review rules
 
 - Staging validates each field's `supporting_text` verbatim against the
-  document text and each identity quote likewise (at least one identity
-  quote must contain the vintage for a year-specific identity).
-  Field-level support is computed (`supported` / `unsupported`); an
-  unsupported field can never be accepted or published.
-- An undated identity with no explicit no-vintage statement is **held**:
-  no year is invented. A wine may publish with `vintage: null` only when
-  the source explicitly states no vintage (as the Sable & Fern sheet
-  does for its seed record).
+  document text and each identity quote likewise. Field-level support is
+  computed (`supported` / `unsupported`); an unsupported field can never
+  be accepted or published. **A present quote does not by itself prove
+  the proposed value**: the reviewer must inspect entailment and reject
+  unsupported or mismatched values. (Source-review observations recorded
+  for this packet: Glassfinch region/varietal/producer-info entailments
+  hold; the pairing proposal does not; the tasting note is absent.)
+- **Missing-vintage ingestion is always held in v1** (`vintage_required`):
+  no year is invented, and there is no no-vintage publication exception.
+  (The pre-existing seed wine with an unknown vintage is seed behavior,
+  not an ingestion outcome; unknown is never described as NV.) Identity
+  evidence must support producer, bottling, and exact year **together**:
+  the identity quotes collectively must contain the producer, the
+  bottling name, and the vintage year — quoting any year somewhere is
+  not sufficient.
 - Review is per-field `accept | reject | hold`, bound to
   `artifact_sha256`, `catalog_snapshot_sha256`, accepted fields,
   `reviewer_ref` ≠ `curator_ref`/operator, `reviewed_at`, and
@@ -148,24 +155,37 @@ question answered from its published revision with source quotes.
 - **Playback vs. actual review:** the supplied
   `review-playback.example.json` is simulated playback, labeled as such
   in data and UI; local demo publication from playback is labeled
-  “simulated review playback”. Independent acceptance exists only when
-  the actual independent reviewer inspects the quotes and supplies/
-  approves the exact artifact separately — this packet deliberately
-  contains no such approval.
+  “simulated review playback”. A caller-supplied `kind: "independent"`
+  or a different `reviewer_ref` string is **not** independent approval:
+  a review carries independently-reviewed status only when its exact
+  digest matches an S-reviewed, hash-pinned artifact recorded in the
+  demo configuration. Until S approves final bindings, every shipped
+  or imported example remains simulated playback.
 - **Deterministic review expiry:** fixture reviews use fixed fixture
   timestamps (reviewed 2026-10-01, `review_before` 2026-12-30) checked
-  against a pinned workspace demo clock, never wall-clock time, so
-  recordings and tests are reproducible. An expired-review case is
-  demonstrated only by explicitly advancing the demo clock in a
-  scenario, deterministically.
+  against a pinned workspace demo clock (shown in the UI as a fixture
+  clock, never described as wall-clock time), so recordings and tests
+  are reproducible. An expired-review case is demonstrated only by
+  explicitly advancing the demo clock in a scenario, deterministically.
 
 ### Publication, deduplication, retrieval (atomic)
 
 - Publication is one SQLite transaction: insert-or-dedupe the wine by
-  canonical identity + exact vintage (unique key), write the immutable
-  publication record under a unique `plan_digest`, and replace that
-  wine's knowledge rows at the new revision. Partial publication is
-  impossible; failures roll back and are surfaced, never swallowed.
+  canonical identity + exact vintage (unique, null-safe dedup key),
+  write the immutable publication record under a unique `plan_digest`,
+  and replace that wine's knowledge rows at the new revision. Partial
+  publication is impossible; failures roll back and are surfaced, never
+  swallowed (covered by a rollback test that forces retrieval-write
+  failure).
+- **Digests are stable and canonical** (SHA-256 over canonical JSON with
+  sorted keys): `source_sha256` over the document bytes;
+  `artifact_sha256` over `{ source_sha256, source_id, identity, fields }`;
+  `catalog_snapshot_sha256` over the sorted catalog identities/fields/
+  revisions; `plan_digest` over `{ artifact_sha256, accepted_fields
+  (sorted), catalog_snapshot_sha256 }`. A review binds the exact plan
+  and snapshot. **Replay precedes freshness checks:** a recorded
+  publication is returned before any stale-snapshot validation, so a
+  legitimate replay never fails because the catalog later changed.
 - Re-importing the same document, or publishing an identity that
   already exists (e.g. the Orchard 2021 sheet), deduplicates to the
   existing wine — no second record, no silent field overwrite.
@@ -189,13 +209,17 @@ question answered from its published revision with source quotes.
   already_published }`; replay/conflict rules as for scans.
 - `GET /api/wines/:id` gains `revision` and knowledge-backed fields.
 - `POST /api/chat { wine_id, question, request_id }` →
-  `{ answer, citations: [{ field, source_id, quote }],
-  evidence_status: answered | unknown, mode: "fixture",
-  provider_latency: "N/A" }`, composed deterministically from the
-  exact published wine revision's knowledge rows only. Supported
-  questions map to published fields; absent evidence answers unknown.
+  `{ wine_id, revision, answer, citations: [{ field, status,
+  source_id, quote }], evidence_status: answered | unknown,
+  mode: "fixture", provider_latency: "N/A" }`, composed
+  deterministically from the exact wine revision's knowledge rows only.
+  Supported questions map to published fields; absent evidence and
+  unsupported questions answer with an explicit unknown template.
+  Request replay binds `wine_id + revision + question`: same
+  `request_id` with any of those changed is `409 request_conflict`.
   Authored fixture answers are labeled simulated everywhere; no live-AI
-  impression, no general chat, no cross-wine facts.
+  impression, no general chat, no cross-wine facts, and a changed
+  selection can never display another wine's answer.
 - Store additions: `artifacts`, `reviews`, `publications`,
   `knowledge_rows (wine_id, revision, field, value, source_id, quote)`
   with unique `(identity_key, vintage)`, unique `plan_digest`, and

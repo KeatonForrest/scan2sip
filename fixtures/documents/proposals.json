@@ -4,36 +4,109 @@
     "glassfinch-aurelia-white": {
       "document": "documents/glassfinch-aurelia-white.html",
       "source_id": "fixture://glassfinch/aurelia-white-sheet",
-      "identity": { "producer": "Glassfinch", "name": "Aurelia White", "vintage": 2018 },
-      "identity_quotes": ["2018 Aurelia White", "Aurelia White is the estate's flagship white."],
+      "identity": {
+        "producer": "Glassfinch",
+        "name": "Aurelia White",
+        "vintage": 2018
+      },
+      "identity_quotes": [
+        "Glassfinch — 2018 Aurelia White",
+        "Aurelia White is the estate's flagship white."
+      ],
       "fields": {
-        "region": { "value": "Pale Coast", "locator": "paragraph 4", "supporting_text": ["Our Aurelia White grows on the chalk terraces of the Pale Coast."] },
-        "varietal": { "value": "Albariño", "locator": "paragraph 5", "supporting_text": ["The 2018 Aurelia White is made entirely from Albariño."] },
-        "producer_info": { "value": "A family-run fictional estate founded for demonstration.", "locator": "paragraph 2", "supporting_text": ["Glassfinch is a family-run fictional estate founded for demonstration."] },
-        "food_pairings": { "value": ["Grilled peaches"], "locator": "proposed by extractor", "supporting_text": ["Pairs beautifully with grilled peaches."], "expected_support": "unsupported — quote absent from the document; review must reject this field" },
-        "tasting_notes": { "value": null, "expected_support": "absent from the document; remains unknown" }
+        "region": {
+          "value": "Pale Coast",
+          "locator": "paragraph 4",
+          "supporting_text": [
+            "Our Aurelia White grows on the chalk terraces of the Pale Coast."
+          ]
+        },
+        "varietal": {
+          "value": "Albariño",
+          "locator": "paragraph 5",
+          "supporting_text": [
+            "The 2018 Aurelia White is made entirely from Albariño."
+          ]
+        },
+        "producer_info": {
+          "value": "A family-run fictional estate founded for demonstration.",
+          "locator": "paragraph 2",
+          "supporting_text": [
+            "Glassfinch is a family-run fictional estate founded for demonstration."
+          ]
+        },
+        "food_pairings": {
+          "value": [
+            "Grilled peaches"
+          ],
+          "locator": "proposed by extractor",
+          "supporting_text": [
+            "Pairs beautifully with grilled peaches."
+          ],
+          "expected_support": "unsupported — quote absent from the document; review must reject this field"
+        },
+        "tasting_notes": {
+          "value": null,
+          "expected_support": "absent from the document; remains unknown"
+        }
       }
     },
     "glassfinch-aurelia-white-undated": {
       "document": "documents/glassfinch-aurelia-white-undated.html",
       "source_id": "fixture://glassfinch/aurelia-white-undated-sheet",
-      "identity": { "producer": "Glassfinch", "name": "Aurelia White", "vintage": null },
-      "identity_quotes": ["Aurelia White is the estate's flagship white."],
+      "identity": {
+        "producer": "Glassfinch",
+        "name": "Aurelia White",
+        "vintage": null
+      },
+      "identity_quotes": [
+        "Aurelia White is the estate's flagship white."
+      ],
       "expected_staging": "held — vintage is not stated and the sheet contains no explicit no-vintage statement, so no year may be invented and the artifact cannot be published as a year-specific or null-vintage wine",
       "fields": {
-        "region": { "value": "Pale Coast", "locator": "paragraph 4", "supporting_text": ["Our Aurelia White grows on the chalk terraces of the Pale Coast."] }
+        "region": {
+          "value": "Pale Coast",
+          "locator": "paragraph 4",
+          "supporting_text": [
+            "Our Aurelia White grows on the chalk terraces of the Pale Coast."
+          ]
+        }
       }
     },
     "orchard-lantern-hillside-red": {
       "document": "documents/orchard-lantern-hillside-red.html",
       "source_id": "fixture://orchard-lantern/hillside-red-sheet",
-      "identity": { "producer": "Orchard Lantern", "name": "Hillside Red", "vintage": 2021 },
-      "identity_quotes": ["The current release is the 2021 Hillside Red"],
+      "identity": {
+        "producer": "Orchard Lantern",
+        "name": "Hillside Red",
+        "vintage": 2021
+      },
+      "identity_quotes": [
+        "The current release is the 2021 Hillside Red"
+      ],
       "expected_staging": "stages, then deduplicates against the existing catalog wine — no second wine, no silent field overwrite",
       "fields": {
-        "region": { "value": "Ember Valley", "locator": "paragraph 3", "supporting_text": ["Grown on the terraced slopes of Ember Valley."] },
-        "varietal": { "value": "Syrah", "locator": "paragraph 4", "supporting_text": ["Hillside Red is made entirely from Syrah."] },
-        "producer_info": { "value": "A fictional two-person winery founded for this demonstration.", "locator": "paragraph 2", "supporting_text": ["Orchard Lantern is a two-person winery."] }
+        "region": {
+          "value": "Ember Valley",
+          "locator": "paragraph 3",
+          "supporting_text": [
+            "Grown on the terraced slopes of Ember Valley."
+          ]
+        },
+        "varietal": {
+          "value": "Syrah",
+          "locator": "paragraph 4",
+          "supporting_text": [
+            "Hillside Red is made entirely from Syrah."
+          ]
+        },
+        "producer_info": {
+          "value": "A fictional two-person winery founded for this demonstration.",
+          "locator": "paragraph 2",
+          "supporting_text": [
+            "Orchard Lantern is a two-person winery."
+          ]
+        }
       }
     }
   }
