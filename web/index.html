@@ -54,6 +54,47 @@
     </section>
   </section>
 
+  <section class="panel" id="evidencePanel">
+    <h2>Evidence flow <small>— synthetic HTML → quoted facts → review → publication</small></h2>
+    <p class="muted">Fixture clock: <span id="demoClock">—</span> (a pinned demo clock, not wall-clock time). Review playback is simulated; independently-reviewed status requires an exact reviewer-approved, hash-pinned artifact.</p>
+    <div id="documents" class="grid"></div>
+    <div class="row">
+      <button id="stageBtn" disabled>Stage selected document</button>
+      <button id="playbackReviewBtn" disabled>Play simulated review</button>
+      <button id="publishBtn" disabled>Publish (local)</button>
+    </div>
+    <div id="artifactView">No document staged yet. Start from an unknown bottle above (for example the Glassfinch sample in the Inspector), then stage its producer sheet here.</div>
+  </section>
+
+  <section class="panel" id="askPanel">
+    <h2>Ask this wine <small>— simulated fixture answers from the exact published revision, with citations or an honest unknown</small></h2>
+    <p id="askWineLabel" class="muted">Match or publish a wine first.</p>
+    <div class="row">
+      <button class="ask-q" data-q="Where is this wine from?">Where is it from?</button>
+      <button class="ask-q" data-q="What grape is it made from?">What grape?</button>
+      <button class="ask-q" data-q="What food should I serve?">Food pairing?</button>
+      <button class="ask-q" data-q="What are the tasting notes?">Tasting notes?</button>
+    </div>
+    <div id="askAnswer">No question asked yet.</div>
+  </section>
+
+  <section class="panel" id="explorerPanel">
+    <h2>Explore the fictional regions <small>— synthetic geography, schematic only</small></h2>
+    <p class="muted">Original schematic of the demo's fictional regions. It shows only the catalog's actual region/vintage facts — no map coordinates, climate, ratings, or predictions.</p>
+    <svg class="region-map" viewBox="0 0 640 260" role="group" aria-label="Synthetic region schematic">
+      <path data-region="Ember Valley" tabindex="0" role="button" aria-label="Browse Ember Valley wines" d="M60 60 q70 -35 130 0 q20 55 -15 85 q-70 25 -115 -10 q-25 -40 0 -75z" />
+      <path data-region="Lantern Coast" tabindex="0" role="button" aria-label="Browse Lantern Coast wines" d="M250 40 q80 -20 120 25 q10 60 -35 85 q-75 15 -105 -30 q-5 -55 20 -80z" />
+      <path data-region="Fern Hollow" tabindex="0" role="button" aria-label="Browse Fern Hollow wines" d="M90 165 q65 -25 115 5 q15 45 -25 65 q-65 15 -100 -15 q-15 -35 10 -55z" />
+      <path data-region="Pale Coast" tabindex="0" role="button" aria-label="Browse Pale Coast wines" d="M300 165 q75 -30 125 0 q20 50 -20 70 q-75 20 -115 -15 q-15 -35 10 -55z" />
+      <text x="125" y="105">Ember Valley</text>
+      <text x="315" y="100">Lantern Coast</text>
+      <text x="150" y="205">Fern Hollow</text>
+      <text x="365" y="205">Pale Coast</text>
+    </svg>
+    <div id="regionChips" class="row"></div>
+    <div id="explorerDetails">Select a region, then a wine.</div>
+  </section>
+
   <details class="inspector">
     <summary>Inspector — all scenarios, replay diagnostics, raw JSON</summary>
     <div class="inspector-body">

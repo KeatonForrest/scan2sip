@@ -24,6 +24,8 @@ const REQUIRED_FILES = new Map([
   ['fixtures/catalog.json', 'catalog'],
   ['fixtures/responses.json', 'model-response'],
   ['fixtures/scenarios.json', 'scenario-index'],
+  ['fixtures/documents/proposals.json', 'model-response'],
+  ['fixtures/documents/review-playback.example.json', 'review-artifact'],
 ]);
 const RESPONSE_MODES = new Set(['ok', 'malformed', 'error_response', 'timeout']);
 
@@ -162,5 +164,25 @@ export function verifyFixtureIntegrity(fixturesDir) {
       fail(`scenario ${scenario.fixture_id} has no authored response`);
     }
   }
-  return { entries: manifest.assets, scenarios, responses, catalog, verified: true };
+  // Milestone-2 consumed sources: the proposals document and every
+  // synthetic source sheet it references must be manifest-bound with
+  // kind 'document', exactly once (byPath already rejects duplicates).
+  const proposalsDoc = readJson(fixturesDir, 'documents/proposals.json');
+  if (!isPlainObject(proposalsDoc) || !isPlainObject(proposalsDoc.proposals)
+    || Object.keys(proposalsDoc.proposals).length === 0) {
+    fail('proposals.json schema: expected { proposals: non-empty object }');
+  }
+  for (const [documentId, proposal] of Object.entries(proposalsDoc.proposals)) {
+    if (!isPlainObject(proposal) || !isNonEmptyString(proposal.document)
+      || !isPlainObject(proposal.identity) || !isNonEmptyString(proposal.source_id)) {
+      fail(`proposals.json schema: malformed proposal ${documentId}`);
+    }
+    const docPath = `fixtures/${proposal.document}`;
+    const docEntry = byPath.get(docPath);
+    if (!docEntry) fail(`proposal ${documentId} document missing from manifest: ${docPath}`);
+    if (docEntry.kind !== 'document') {
+      fail(`proposal ${documentId} document must be kind document, found ${docEntry.kind}`);
+    }
+  }
+  return { entries: manifest.assets, scenarios, responses, catalog, proposalsDoc, verified: true };
 }

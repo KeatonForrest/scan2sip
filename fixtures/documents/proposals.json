@@ -82,7 +82,8 @@
         "vintage": 2021
       },
       "identity_quotes": [
-        "The current release is the 2021 Hillside Red"
+        "The current release is the 2021 Hillside Red",
+        "Orchard Lantern is a two-person winery."
       ],
       "expected_staging": "stages, then deduplicates against the existing catalog wine — no second wine, no silent field overwrite",
       "fields": {

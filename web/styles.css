@@ -32,6 +32,18 @@ h1 em { color:var(--accent); font-style:italic; }
 blockquote { width:100%; margin:4px 0 4px 142px; color:var(--muted); border-left:3px solid var(--accent); padding-left:10px; }
 .nofacts { font-style:italic; }
 .reset-error { color:var(--bad); border:1px solid var(--bad); border-radius:8px; padding:8px 12px; }
+.panel { margin-top:34px; border:1px solid var(--line); border-radius:14px; padding:20px; background:#0e110e; }
+.panel h2 { font-family:Georgia, serif; font-weight:400; margin-top:0; }
+.panel h2 small, .muted { color:var(--muted); font-size:13.5px; }
+.region-map { width:100%; max-width:640px; height:auto; display:block; }
+.region-map path { fill:#1b241a; stroke:var(--line); cursor:pointer; }
+.region-map path:hover, .region-map path.sel { stroke:var(--accent); fill:#243020; }
+.region-map text { fill:var(--ink); font-size:13px; text-anchor:middle; pointer-events:none; }
+.chip-btn { background:#1c241c; border:1px solid var(--line); border-radius:20px; color:var(--ink); padding:6px 12px; cursor:pointer; }
+.chip-btn.sel { border-color:var(--accent); color:var(--accent); }
+.doc-card .doc-select { background:none; border:0; color:var(--ink); font:inherit; text-align:left; cursor:pointer; padding:0; }
+.doc-card a { color:var(--accent); font-size:13px; }
+.region-map path:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .inspector { margin-top:34px; border:1px solid var(--line); border-radius:14px; padding:16px 20px; }
 .inspector summary { cursor:pointer; font-size:17px; color:var(--accent); }
 .inspector-body { padding-top:8px; }

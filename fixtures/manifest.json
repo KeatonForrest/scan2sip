@@ -255,7 +255,7 @@
     {
       "id": "doc-proposals",
       "path": "fixtures/documents/proposals.json",
-      "sha256": "95c7a755a9339beb6b2fa3ff42d7d66e2270c42b1179d07de5f9b28ca51d7c5b",
+      "sha256": "de877d01a83a229581aa8846ed278842874913a54ed4480bd838fc64dea67b47",
       "kind": "model-response",
       "creator": "C/Pi (demo author)",
       "creation_method": "authored JSON",
@@ -279,6 +279,20 @@
       "modifications": "none",
       "scenario": "simulated review playback example \u2014 NOT an independent review",
       "reviewer": "author self-check; independent review pending"
+    },
+    {
+      "id": "doc-review-candidate-glassfinch",
+      "path": "fixtures/documents/review-candidate.glassfinch.json",
+      "sha256": "bf3067347826c67b82fc3818515bf840a6adbd1e23a3d549c2f32b15cf27241c",
+      "kind": "review-artifact",
+      "creator": "C/Pi (demo author)",
+      "creation_method": "generated candidate bindings from staged artifact; pending S approval",
+      "synthetic": true,
+      "rights_basis": "original work created for this demo",
+      "source_lineage": "original",
+      "modifications": "none",
+      "scenario": "candidate exact evidence-review artifact for Glassfinch \u2014 NOT approved, NOT pinned",
+      "reviewer": "pending S/Codex exact-artifact review"
     }
   ]
 }

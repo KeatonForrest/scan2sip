@@ -78,7 +78,7 @@ async function withBrowser(fn) {
       }
       assert.fail(`timeout waiting for ${label}`);
     };
-    await waitFor(`document.querySelectorAll('.card').length === 10`, 'UI load');
+    await waitFor(`document.querySelectorAll('#scenarios .card').length === 10`, 'UI load');
     await fn({ evaluate, waitFor });
   } finally {
     try { ws?.close(); } catch {}
@@ -136,6 +136,34 @@ test('browser: correlated UI state, stale-wine and reset-race regressions', { sk
     await sleep(400);
     assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`), true, 'outdated reset must not clear the newer match');
     assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), true, 'newer wine facts survive the outdated reset');
+  });
+});
+
+test('browser: evidence flow publishes, rescan matches, chat cites, explorer browses', { skip }, async () => {
+  await withBrowser(async ({ evaluate, waitFor }) => {
+    // Stage the Glassfinch sheet, play the simulated review, publish.
+    await evaluate(`document.querySelector('.doc-card[data-doc="glassfinch-aurelia-white"] .doc-select').click(); document.getElementById('stageBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('Albariño')`, 'artifact staged');
+    assert.equal(await evaluate(`document.getElementById('artifactView').textContent.includes('unsupported')`), true, 'unsupported pairing is visible');
+    await evaluate(`document.getElementById('playbackReviewBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('simulated-playback')`, 'playback review imported');
+    await evaluate(`document.getElementById('publishBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('published')`, 'publication shown');
+    // Rescan the previously unknown bottle: it now matches.
+    await evaluate(`document.querySelector('#scenarios .card[data-fixture="scan-unknown-glassfinch"]').click(); document.getElementById('scanBtn').click(); true`);
+    await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`, 'rescan matched');
+    // Ask the exact UI grape question: varietal answer with citation.
+    await evaluate(`[...document.querySelectorAll('.ask-q')].find((b) => b.textContent.includes('What grape')).click(); true`);
+    await waitFor(`document.getElementById('askAnswer').textContent.includes('Albariño')`, 'grape answer');
+    assert.equal(await evaluate(`document.getElementById('askAnswer').textContent.includes('simulated-playback')`), true, 'chat shows review classification');
+    // Explorer: keyboard-select Pale Coast, open the Glassfinch chip.
+    await evaluate(`(() => { const p = document.querySelector('.region-map path[data-region="Pale Coast"]'); p.focus(); p.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); return true; })()`);
+    await waitFor(`document.getElementById('regionChips').textContent.includes('Glassfinch')`, 'region chips');
+    await evaluate(`document.querySelector('#regionChips .chip-btn').click(); true`);
+    await waitFor(`document.getElementById('explorerDetails').textContent.includes('Pale Coast')`, 'explorer details');
+    // Reset invalidates the staged evidence state.
+    await evaluate(`document.getElementById('resetBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('No document staged')`, 'reset clears evidence panel');
   });
 });
 
