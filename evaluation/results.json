@@ -1,0 +1,237 @@
+{
+  "schema": "scan2sip-evaluation-v1",
+  "mode": "fixture (simulated provider output; provider latency N/A; no model-accuracy or provider-performance claim)",
+  "fixture_manifest_sha256": "35d756aa5e94cbc2352c7329e56d34265b97913b1a137acab8b8ab82392c9396",
+  "case_count": 14,
+  "passed": 14,
+  "cases": [
+    {
+      "id": "match",
+      "title": "Correct catalog match",
+      "expected": {
+        "status": "matched",
+        "wine_id": "wine-orchard-lantern-hillside-red-2021",
+        "varietal_status": "reviewed synthetic source",
+        "tasting_status": "AI-generated fixture"
+      },
+      "observed": {
+        "status": "matched",
+        "wine_id": "wine-orchard-lantern-hillside-red-2021",
+        "varietal_status": "reviewed synthetic source",
+        "tasting_status": "AI-generated fixture"
+      },
+      "pass": true
+    },
+    {
+      "id": "vintage-mismatch",
+      "title": "Vintage mismatch",
+      "expected": {
+        "status": "missing",
+        "reason": "vintage_mismatch"
+      },
+      "observed": {
+        "status": "missing",
+        "reason": "vintage_mismatch"
+      },
+      "pass": true
+    },
+    {
+      "id": "request-replay",
+      "title": "Same request replayed",
+      "expected": {
+        "replayed": true,
+        "status": "matched"
+      },
+      "observed": {
+        "replayed": true,
+        "status": "matched"
+      },
+      "pass": true
+    },
+    {
+      "id": "duplicate-rescan",
+      "title": "Rescan duplicates no catalog identity",
+      "expected": {
+        "status": "matched",
+        "wine_count": 4
+      },
+      "observed": {
+        "status": "matched",
+        "wine_count": 4
+      },
+      "pass": true
+    },
+    {
+      "id": "unknown-wine",
+      "title": "Unknown wine",
+      "expected": {
+        "status": "missing",
+        "reason": "unknown_wine",
+        "demand_created": true
+      },
+      "observed": {
+        "status": "missing",
+        "reason": "unknown_wine",
+        "demand_created": true
+      },
+      "pass": true
+    },
+    {
+      "id": "uncertainty",
+      "title": "Uncertain scan is provisional",
+      "expected": {
+        "status": "provisional"
+      },
+      "observed": {
+        "status": "provisional"
+      },
+      "pass": true
+    },
+    {
+      "id": "missing-vintage",
+      "title": "Missing vintage semantics",
+      "expected": {
+        "orchard": "vintage_required",
+        "sable": "matched"
+      },
+      "observed": {
+        "orchard": "vintage_required",
+        "sable": "matched"
+      },
+      "pass": true
+    },
+    {
+      "id": "missing-fields",
+      "title": "Missing fields and AI-only notes",
+      "expected": {
+        "food_pairings": [
+          "unknown",
+          null
+        ],
+        "tasting_notes_status": "AI-generated fixture"
+      },
+      "observed": {
+        "food_pairings": [
+          "unknown",
+          null
+        ],
+        "tasting_notes_status": "AI-generated fixture"
+      },
+      "pass": true
+    },
+    {
+      "id": "provider-failures",
+      "title": "Simulated provider failures",
+      "expected": {
+        "error_response": "provider_error_response",
+        "malformed": "malformed_response",
+        "timeout": "provider_timeout_ambiguous"
+      },
+      "observed": {
+        "error_response": "provider_error_response",
+        "malformed": "malformed_response",
+        "timeout": "provider_timeout_ambiguous"
+      },
+      "pass": true
+    },
+    {
+      "id": "rejected-evidence",
+      "title": "Unsupported evidence and held undated artifact",
+      "expected": {
+        "food_pairings": "unsupported",
+        "tasting_notes": "absent",
+        "undated_status": "held",
+        "undated_reason": "vintage_required"
+      },
+      "observed": {
+        "food_pairings": "unsupported",
+        "tasting_notes": "absent",
+        "undated_status": "held",
+        "undated_reason": "vintage_required"
+      },
+      "pass": true
+    },
+    {
+      "id": "independent-review",
+      "title": "Approved review binding",
+      "expected": {
+        "classification": "independently-reviewed",
+        "review_digest": "9dff1bcb0ea54ea53263856c3bd891c6aea8eb6dec773f54bb2c7044601a8189",
+        "accepted_fields": [
+          "producer_info",
+          "region",
+          "varietal"
+        ]
+      },
+      "observed": {
+        "classification": "independently-reviewed",
+        "review_digest": "9dff1bcb0ea54ea53263856c3bd891c6aea8eb6dec773f54bb2c7044601a8189",
+        "accepted_fields": [
+          "producer_info",
+          "region",
+          "varietal"
+        ]
+      },
+      "pass": true
+    },
+    {
+      "id": "publication-chat",
+      "title": "Publication, retrieval and exact-wine chat",
+      "expected": {
+        "publish_status": "published",
+        "review_classification": "independently-reviewed",
+        "field_status": "reviewed synthetic source",
+        "field_classification": "independently-reviewed",
+        "chat_region": [
+          "answered",
+          "region",
+          1
+        ],
+        "chat_grape_field": "varietal",
+        "chat_unknown": "unknown"
+      },
+      "observed": {
+        "publish_status": "published",
+        "review_classification": "independently-reviewed",
+        "field_status": "reviewed synthetic source",
+        "field_classification": "independently-reviewed",
+        "chat_region": [
+          "answered",
+          "region",
+          1
+        ],
+        "chat_grape_field": "varietal",
+        "chat_unknown": "unknown"
+      },
+      "pass": true
+    },
+    {
+      "id": "duplicate-publication",
+      "title": "Duplicate publication",
+      "expected": {
+        "status": "already_published",
+        "changed": false,
+        "wine_count": 5
+      },
+      "observed": {
+        "status": "already_published",
+        "changed": false,
+        "wine_count": 5
+      },
+      "pass": true
+    },
+    {
+      "id": "rescan-published",
+      "title": "Rescan after publication",
+      "expected": {
+        "status": "matched",
+        "wine_id": "wine-glassfinch-aurelia-white-2018"
+      },
+      "observed": {
+        "status": "matched",
+        "wine_id": "wine-glassfinch-aurelia-white-2018"
+      },
+      "pass": true
+    }
+  ]
+}

@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "eval": "node evaluation/evaluate.mjs",
+    "eval:check": "node evaluation/evaluate.mjs --check"
   },
   "dependencies": {
     "express": "^5.1.0"
