@@ -26,6 +26,7 @@ const REQUIRED_FILES = new Map([
   ['fixtures/scenarios.json', 'scenario-index'],
   ['fixtures/documents/proposals.json', 'model-response'],
   ['fixtures/documents/review-playback.example.json', 'review-artifact'],
+  ['fixtures/documents/approved-glassfinch-review.json', 'review-artifact'],
 ]);
 const RESPONSE_MODES = new Set(['ok', 'malformed', 'error_response', 'timeout']);
 

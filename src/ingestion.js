@@ -235,9 +235,13 @@ export function createIngestion({
     const recorded = store.getPublicationByPlan(review.plan_digest)
       ?? store.getPublicationByArtifact(artifact.artifact_sha256);
     if (recorded) {
+      const storedWine = store.getWine(recorded.wine_id);
       const result = {
         status: 'already_published', plan_digest: recorded.plan_digest,
         wine_id: recorded.wine_id, revision: recorded.revision, changed: false,
+        // Always the STORED provenance, never the selected import's.
+        review_classification: Object.values(storedWine?.fields ?? {})
+          .find((f) => f.review_classification)?.review_classification ?? null,
       };
       store.recordBoundRequest('publication_requests', request_id, artifact_id, result);
       return result;
@@ -262,6 +266,8 @@ export function createIngestion({
         return {
           status: 'already_published', plan_digest: review.plan_digest,
           wine_id: existing.id, revision: existing.revision, changed: false,
+          review_classification: Object.values(existing.fields)
+            .find((f) => f.review_classification)?.review_classification ?? null,
         };
       }
       const wine_id = `wine-${dedup_key.replace(/[^a-z0-9]+/g, '-')}`;

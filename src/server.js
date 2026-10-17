@@ -13,6 +13,15 @@ import { createIngestion, dedupKeyFor } from './ingestion.js';
 const root = path.dirname(fileURLToPath(import.meta.url)) + '/..';
 const fixturesDir = path.join(root, 'fixtures');
 
+// Immutable server-side pin: the canonical digest of the one exact
+// S-reviewed independent review artifact
+// (fixtures/documents/approved-glassfinch-review.json, raw SHA-256
+// 5226d06e911b48f75aceb9389305db4adbf1e60b9280ca0a23d8977bc97b53c2).
+// Only a review whose bound canonical digest equals this pin can carry
+// independently-reviewed status; nothing a caller supplies changes it.
+export const PINNED_INDEPENDENT_REVIEW_DIGEST =
+  '9dff1bcb0ea54ea53263856c3bd891c6aea8eb6dec773f54bb2c7044601a8189';
+
 export function buildDemo({
   dbPath = path.join(root, 'data', 'scan2sip.sqlite'),
   fixturesDir: fixturesRoot = fixturesDir,
@@ -46,7 +55,10 @@ export function buildDemo({
   seedKnowledge();
   const model = loadFixtureModel(integrity.responses);
   const service = createService({ store, model });
-  const ingestion = createIngestion({ store, proposalsDoc: integrity.proposalsDoc, fixturesRoot });
+  const ingestion = createIngestion({
+    store, proposalsDoc: integrity.proposalsDoc, fixturesRoot,
+    pinnedIndependentReviewDigest: PINNED_INDEPENDENT_REVIEW_DIGEST,
+  });
   return { store, service, catalog, integrity, fixturesRoot, ingestion, seedKnowledge };
 }
 

@@ -265,6 +265,71 @@ test('chat: exact wine/revision citations, unknown evidence, replay binding', ()
   );
 });
 
+async function loadApprovedReview() {
+  const fs = await import('node:fs');
+  return JSON.parse(fs.readFileSync(new URL('../fixtures/documents/approved-glassfinch-review.json', import.meta.url), 'utf8'));
+}
+
+test('approved pin: exact S-reviewed artifact is independently-reviewed through publication and chat', async () => {
+  const demo = makeDemo();
+  const artifact = stageGlassfinch(demo);
+  const approved = await loadApprovedReview();
+  const review = demo.ingestion.importReview(artifact.artifact_id, { review: approved });
+  assert.equal(review.classification, 'independently-reviewed');
+  assert.equal(review.review_digest, '9dff1bcb0ea54ea53263856c3bd891c6aea8eb6dec773f54bb2c7044601a8189');
+  const published = demo.ingestion.publish({
+    artifact_id: artifact.artifact_id, request_id: 'pub-approved', review_digest: review.review_digest,
+  });
+  assert.equal(published.status, 'published');
+  assert.equal(published.review_classification, 'independently-reviewed');
+  const wine = demo.store.getWine(published.wine_id);
+  assert.equal(wine.fields.region.review_classification, 'independently-reviewed');
+  const chat = demo.ingestion.chat({ wine_id: published.wine_id, question: 'Where is this wine from?', request_id: 'chat-approved' });
+  assert.equal(chat.citations[0].review_classification, 'independently-reviewed');
+});
+
+test('tampering with the approved artifact cannot gain independent status', async () => {
+  const demo = makeDemo();
+  const artifact = stageGlassfinch(demo);
+  const approved = await loadApprovedReview();
+  const tampered = { ...approved, reviewer_ref: 'Mallory', accepted_fields: ['region'] };
+  // Accepted-fields change breaks the plan binding; a tampered review
+  // must fail or fall back to simulated — never independent.
+  let classification = null;
+  try {
+    classification = demo.ingestion.importReview(artifact.artifact_id, { review: tampered }).classification;
+  } catch (e) {
+    assert.ok(['invalid_review_plan', 'invalid_review_contradiction', 'stale_snapshot'].includes(e.code));
+  }
+  assert.notEqual(classification, 'independently-reviewed');
+  const relabeled = { ...approved, reviewer_ref: 'Mallory' };
+  const relabeledReview = demo.ingestion.importReview(artifact.artifact_id, { review: relabeled });
+  assert.equal(relabeledReview.classification, 'simulated-playback');
+});
+
+test('replay/publication cannot upgrade an earlier simulated publication', async () => {
+  const demo = makeDemo();
+  // Both reviews are imported while the bound snapshot is current;
+  // the simulated one publishes first.
+  const artifact = stageGlassfinch(demo, 'stage-upgrade');
+  const playback = demo.ingestion.importReview(artifact.artifact_id, { source: 'playback_example' });
+  const approved = await loadApprovedReview();
+  const review = demo.ingestion.importReview(artifact.artifact_id, { review: approved });
+  assert.equal(review.classification, 'independently-reviewed');
+  const published = demo.ingestion.publish({
+    artifact_id: artifact.artifact_id, request_id: 'pub-upgrade-first', review_digest: playback.review_digest,
+  });
+  assert.equal(published.review_classification, 'simulated-playback');
+  const replay = demo.ingestion.publish({
+    artifact_id: artifact.artifact_id, request_id: 'pub-upgrade', review_digest: review.review_digest,
+  });
+  assert.equal(replay.status, 'already_published');
+  const wine = demo.store.getWine(published.wine_id);
+  assert.equal(wine.fields.region.review_classification, 'simulated-playback');
+  const chat = demo.ingestion.chat({ wine_id: published.wine_id, question: 'Where is this wine from?', request_id: 'chat-upgrade' });
+  assert.equal(chat.citations[0].review_classification, 'simulated-playback');
+});
+
 test('regions explorer groups actual catalog facts only', async () => {
   const demo = makeDemo();
   publishGlassfinch(demo);

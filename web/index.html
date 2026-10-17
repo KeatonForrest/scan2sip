@@ -12,11 +12,13 @@
   <span>Fictional wines · authored model responses · no credentials or provider calls · provider latency N/A</span>
   <details class="badge-more">
     <summary>What is real here?</summary>
-    <p>Matching, uncertainty handling, deduplication and per-field attribution
-    run as real local code. The model outputs are authored fixtures, not
-    provider recordings or accuracy evidence. An AI-generated fixture note is
-    never producer-verified. Ingestion, review/publication and chat arrive in
-    a later milestone.</p>
+    <p>Matching, uncertainty handling, deduplication, per-field attribution,
+    staged evidence, publication, retrieval and chat run as real local code.
+    The model outputs are authored fixtures, not provider recordings or
+    accuracy evidence. An AI-generated fixture note is never
+    producer-verified. One Glassfinch review artifact has been independently
+    reviewed and hash-pinned by the reviewer; everything else labeled
+    playback is simulated.</p>
   </details>
 </header>
 
@@ -61,6 +63,7 @@
     <div class="row">
       <button id="stageBtn" disabled>Stage selected document</button>
       <button id="playbackReviewBtn" disabled>Play simulated review</button>
+      <button id="approvedReviewBtn" disabled>Load approved review (S-reviewed)</button>
       <button id="publishBtn" disabled>Publish (local)</button>
     </div>
     <div id="artifactView">No document staged yet. Start from an unknown bottle above (for example the Glassfinch sample in the Inspector), then stage its producer sheet here.</div>

@@ -4,9 +4,9 @@ A runnable **local, no-credential, synthetic-fixture** demonstration of a
 scan-to-knowledge flow:
 
 bottle label → observed identity → exact match or visible uncertainty →
-per-field attributed details → (later milestone) wine-specific chat, plus a
-synthetic document → quoted evidence → staging → review → publication →
-retrieval path.
+per-field attributed details → wine-specific chat, plus a synthetic
+document → quoted evidence → staging → review → publication → retrieval
+path, and a small fictional-region explorer.
 
 Everything in this repository is fictional: fictional producers, wines, label
 artwork and model responses. Fixture mode never calls a provider, never needs
@@ -16,9 +16,14 @@ provider latency is always reported as **N/A** in fixture mode.
 
 ## Status
 
-Milestone 1: skeleton + fixture scan/matching/uncertainty.
-Ingestion, review/publication and chat are later milestones behind review
-checkpoints; they are described in `docs/CONTRACT.md` but not implemented yet.
+Implemented: fixture scan/matching/uncertainty (milestone 1) and
+synthetic HTML ingestion → review → atomic publication/retrieval →
+wine chat, plus the region explorer (milestone 2). One Glassfinch review
+artifact is independently reviewed and hash-pinned server-side
+(`fixtures/documents/approved-glassfinch-review.json`); simulated review
+playback remains available and clearly labeled. A clean-checkout
+evaluation run and a short recording remain future, separately reviewed
+steps.
 
 ## Decisions and defaults (all reversible)
 

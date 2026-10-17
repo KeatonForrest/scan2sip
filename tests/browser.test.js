@@ -149,6 +149,10 @@ test('browser: evidence flow publishes, rescan matches, chat cites, explorer bro
     await waitFor(`document.getElementById('artifactView').textContent.includes('simulated-playback')`, 'playback review imported');
     await evaluate(`document.getElementById('publishBtn').click(); true`);
     await waitFor(`document.getElementById('artifactView').textContent.includes('published')`, 'publication shown');
+    // Republishing renders the STORED provenance, never the import's.
+    await evaluate(`document.getElementById('publishBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('existing facts and provenance unchanged')`, 'republish provenance shown');
+    assert.equal(await evaluate(`document.getElementById('artifactView').textContent.includes('stored review classification: simulated-playback')`), true);
     // Rescan the previously unknown bottle: it now matches.
     await evaluate(`document.querySelector('#scenarios .card[data-fixture="scan-unknown-glassfinch"]').click(); document.getElementById('scanBtn').click(); true`);
     await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Exact catalog match')`, 'rescan matched');
@@ -164,6 +168,67 @@ test('browser: evidence flow publishes, rescan matches, chat cites, explorer bro
     // Reset invalidates the staged evidence state.
     await evaluate(`document.getElementById('resetBtn').click(); true`);
     await waitFor(`document.getElementById('artifactView').textContent.includes('No document staged')`, 'reset clears evidence panel');
+  });
+});
+
+test('browser: delayed reset response cannot erase a newer staged document', { skip }, async () => {
+  await withBrowser(async ({ evaluate, waitFor }) => {
+    // Pre-reset state in the scan/chat panels that the reset must clear.
+    await scanKnownMatch(evaluate, waitFor);
+    // Hold the reset RESPONSE after the server has applied it.
+    await evaluate(`(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.__releaseReset = null;
+      window.fetch = (url, opts) => {
+        if (String(url).includes('/api/reset')) {
+          return originalFetch(url, opts).then((res) => new Promise((resolve) => {
+            window.__releaseReset = () => resolve(res);
+          }));
+        }
+        return originalFetch(url, opts);
+      };
+      return true;
+    })()`);
+    await evaluate(`document.getElementById('resetBtn').click(); true`);
+    await sleep(400); // server reset applied; only delivery is held
+    // A newer action in another panel: select + stage the Glassfinch sheet.
+    await evaluate(`document.querySelector('.doc-card[data-doc="glassfinch-aurelia-white"] .doc-select').click(); document.getElementById('stageBtn').click(); true`);
+    await waitFor(`document.getElementById('artifactView').textContent.includes('Albariño')`, 'newer staged document rendered');
+    await evaluate(`window.__releaseReset(); true`);
+    await sleep(400);
+    assert.equal(await evaluate(`document.getElementById('artifactView').textContent.includes('Albariño')`), true, 'outdated reset must not erase the newer staged document');
+    assert.equal(await evaluate(`document.getElementById('artifactView').textContent.includes('No document staged')`), false, 'evidence panel was not reset by the outdated response');
+    // …while the untouched pre-reset scan/chat panels are still cleared.
+    assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), false, 'pre-reset wine facts are cleared');
+    assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Workspace reset')`), true, 'scan panel shows the reset');
+    assert.equal(await evaluate(`document.getElementById('askWineLabel').textContent.includes('Match or publish')`), true, 'chat target is cleared');
+  });
+});
+
+test('browser: late scan response after a completed reset does not restore facts', { skip }, async () => {
+  await withBrowser(async ({ evaluate, waitFor }) => {
+    // Hold the scan RESPONSE after the server has processed it.
+    await evaluate(`(() => {
+      const originalFetch = window.fetch.bind(window);
+      window.__releaseScan = null;
+      window.fetch = (url, opts) => {
+        if (String(url).includes('/api/scans')) {
+          return originalFetch(url, opts).then((res) => res.clone().json()).then((body) => new Promise((resolve) => {
+            window.__releaseScan = () => resolve(new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } }));
+          }));
+        }
+        return originalFetch(url, opts);
+      };
+      return true;
+    })()`);
+    await evaluate(`document.querySelector('.sample[data-fixture="scan-orchard-2021"]').click(); document.getElementById('scanBtn').click(); true`);
+    await sleep(400); // scan processed server-side; only delivery is held
+    await evaluate(`document.getElementById('resetBtn').click(); true`);
+    await waitFor(`document.getElementById('outcomeTitle').textContent.includes('Workspace reset')`, 'reset rendered');
+    await evaluate(`window.__releaseScan(); true`);
+    await sleep(400);
+    assert.equal(await evaluate(`document.getElementById('outcomeTitle').textContent.includes('Workspace reset')`), true, 'late scan does not overwrite the reset');
+    assert.equal(await evaluate(`document.getElementById('wineFacts').textContent.includes('Syrah')`), false, 'late scan restores no facts');
   });
 });
 

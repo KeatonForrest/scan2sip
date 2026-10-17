@@ -1,0 +1,28 @@
+{
+  "schema": "scan2sip-review-v1",
+  "kind": "independent",
+  "status": "Approved after independent source and exact-binding review",
+  "reviewer_ref": "S/Codex",
+  "curator_ref": "demo-operator",
+  "reviewed_at": "2026-10-01T00:00:00.000Z",
+  "review_before": "2026-12-30T00:00:00.000Z",
+  "decisions": {
+    "region": "accept",
+    "varietal": "accept",
+    "producer_info": "accept",
+    "food_pairings": "reject",
+    "tasting_notes": "hold"
+  },
+  "accepted_fields": [
+    "producer_info",
+    "region",
+    "varietal"
+  ],
+  "artifact_sha256": "371f33ec18913c85fd7603877220185353f894c5a68c846f586cd114b326f545",
+  "catalog_snapshot_sha256": "566449a15edcb928c3df1a10091cfcdd8a6c59c20d1ae7c3d721fd5084f4d5b4",
+  "plan_digest": "d17be186451cbcafe0a37880ff4c2d0f0beecbe2d9ef1dd79b287e14caa0a01e",
+  "source_sha256": "de9aa8402c75bceac16a19b6cf39731d027f6d3ab0fd63a716c16d6c46b1632a",
+  "actual_reviewed_at": "2026-10-17T16:12:21.452Z",
+  "time_basis": "reviewed_at and review_before are synthetic scenario-policy timestamps evaluated against the pinned demo clock; actual_reviewed_at records the independent review time.",
+  "scope": "Synthetic fixture only. Accept supported region, varietal and producer_info; reject unsupported food_pairings; hold absent tasting_notes. Not real producer verification."
+}

@@ -1,7 +1,9 @@
 # Fixture manifest schema
 
-Every fixture asset (label artwork, catalog data, model responses, later:
-synthetic documents and review artifacts) has one entry in
+Every fixture asset — label artwork, catalog data, model responses,
+synthetic documents (`fixtures/documents/`), extraction proposals, and
+review artifacts (simulated playback, the candidate artifact, and the
+independently approved Glassfinch review) — has one entry in
 `fixtures/manifest.json`. No asset ships without an entry.
 
 ## Entry fields

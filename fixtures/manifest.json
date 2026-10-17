@@ -293,6 +293,20 @@
       "modifications": "none",
       "scenario": "candidate exact evidence-review artifact for Glassfinch \u2014 NOT approved, NOT pinned",
       "reviewer": "pending S/Codex exact-artifact review"
+    },
+    {
+      "id": "doc-approved-glassfinch-review",
+      "path": "fixtures/documents/approved-glassfinch-review.json",
+      "sha256": "5226d06e911b48f75aceb9389305db4adbf1e60b9280ca0a23d8977bc97b53c2",
+      "kind": "review-artifact",
+      "creator": "S/Codex (independent reviewer)",
+      "creation_method": "independently approved exact review artifact, copied byte-identical from the reviewer's public-safe export",
+      "synthetic": true,
+      "rights_basis": "original work created for this demo",
+      "source_lineage": "independent reviewer artifact for the Glassfinch fixture",
+      "modifications": "none",
+      "scenario": "S-approved independent review of Glassfinch region/varietal/producer-info; pairing rejected, tasting note held",
+      "reviewer": "S/Codex"
     }
   ]
 }

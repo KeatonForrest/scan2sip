@@ -8,6 +8,11 @@ let scenarios = [];
 let selected = null;
 let lastScan = null; // { fixture_id, request_id }
 let generation = 0;
+// Shared UI epoch: every state-changing action in ANY panel bumps it.
+// A reset completion is honored only if no newer action in any panel
+// has superseded the reset that was captured.
+let uiEpoch = 0;
+const bumpEpoch = () => ++uiEpoch;
 
 const $ = (id) => document.getElementById(id);
 
@@ -34,6 +39,7 @@ function clearOutcome(title = 'Pick a sample, then scan.', text = 'The result wi
 
 function selectScenario(scenario, { fromSample = false } = {}) {
   generation += 1;
+  bumpEpoch();
   selected = scenario;
   // Selection clears the visible result/wine, but replay stays bound to
   // the original fixture + request_id (buttons reflect lastScan, not the
@@ -61,6 +67,15 @@ function selectScenario(scenario, { fromSample = false } = {}) {
 
 async function runScan(fixtureId, requestId) {
   const token = ++generation;
+  bumpEpoch();
+  // Any scan (including replay/rescan, which may not pass through a
+  // selection change) immediately invalidates the previous wine's chat:
+  // a non-matched or failed result must never retain another wine as
+  // the active ask target.
+  askWineId = null;
+  chatGeneration += 1;
+  $('askWineLabel').textContent = 'Match or publish a wine first.';
+  $('askAnswer').textContent = 'No question asked yet.';
   clearOutcome('Scanning (simulated)…', 'The authored fixture response is being matched locally.');
   $('outcomeChip').textContent = 'Working';
   let body;
@@ -114,6 +129,7 @@ async function showWine(id, token) {
       <div class="field"><span class="fname">${field}</span>
       <span>${f.value ?? '<span class="unknown">Unknown</span>'}</span>
       <span class="status ${f.status === 'unknown' ? 'warn' : ''}">${f.status}</span>
+      ${f.review_classification ? `<span class="status">review: ${f.review_classification}</span>` : ''}
       ${f.quote ? `<blockquote>“${f.quote}” <small>${f.source_id}</small></blockquote>` : ''}
       </div>`).join('');
 }
@@ -156,11 +172,13 @@ async function loadDocuments() {
   document.querySelectorAll('.doc-card .doc-select').forEach((el) => el.addEventListener('click', () => {
     const card = el.closest('.doc-card');
     evidenceGeneration += 1;
+    bumpEpoch();
     selectedDocument = card.dataset.doc;
     stagedArtifact = null; importedReview = null;
     document.querySelectorAll('.doc-card').forEach((c) => c.classList.toggle('sel', c === card));
     $('stageBtn').disabled = false;
     $('playbackReviewBtn').disabled = true;
+    $('approvedReviewBtn').disabled = true;
     $('publishBtn').disabled = true;
     $('artifactView').textContent = 'Document selected. Stage it to validate its quoted evidence.';
   }));
@@ -168,6 +186,7 @@ async function loadDocuments() {
 
 $('stageBtn').addEventListener('click', async () => {
   const token = ++evidenceGeneration;
+  bumpEpoch();
   const documentId = selectedDocument;
   const res = await fetch('/api/documents', {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -178,6 +197,7 @@ $('stageBtn').addEventListener('click', async () => {
   if (!res.ok) { $('artifactView').textContent = `Staging failed: ${artifact.error}`; return; }
   stagedArtifact = artifact;
   $('playbackReviewBtn').disabled = artifact.status === 'held';
+  $('approvedReviewBtn').disabled = artifact.status === 'held';
   $('artifactView').innerHTML = `<h3>${artifact.identity.producer} · ${artifact.identity.name} · ${artifact.identity.vintage ?? 'vintage unknown'}</h3>
     <p>Status: <strong>${artifact.status}</strong>${artifact.reason ? ` (${artifact.reason})` : ''} · artifact <code>${artifact.artifact_sha256.slice(0, 12)}…</code></p>` +
     artifact.fields.map((f) => `<div class="field"><span class="fname">${f.field}</span><span>${f.value ?? '<span class="unknown">Unknown</span>'}</span><span class="status ${f.support === 'supported' ? '' : 'warn'}">${f.support}</span>${f.quotes?.map((q) => `<blockquote>“${q.quote}”</blockquote>`).join('') ?? ''}</div>`).join('');
@@ -185,6 +205,7 @@ $('stageBtn').addEventListener('click', async () => {
 
 $('playbackReviewBtn').addEventListener('click', async () => {
   const token = ++evidenceGeneration;
+  bumpEpoch();
   const artifactId = stagedArtifact.artifact_id;
   const res = await fetch(`/api/artifacts/${artifactId}/review`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -198,8 +219,26 @@ $('playbackReviewBtn').addEventListener('click', async () => {
   $('artifactView').insertAdjacentHTML('beforeend', `<p>Simulated review playback imported (classification: <strong>${review.classification}</strong> — not independently reviewed). Accepted: ${review.accepted_fields.join(', ')}. Plan <code>${review.plan_digest.slice(0, 12)}…</code></p>`);
 });
 
+$('approvedReviewBtn').addEventListener('click', async () => {
+  const token = ++evidenceGeneration;
+  bumpEpoch();
+  const artifactId = stagedArtifact.artifact_id;
+  const review = await (await fetch('/fixtures/documents/approved-glassfinch-review.json')).json();
+  const res = await fetch(`/api/artifacts/${artifactId}/review`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ review }),
+  });
+  const body = await res.json();
+  if (token !== evidenceGeneration || stagedArtifact?.artifact_id !== artifactId) return;
+  if (!res.ok) { $('artifactView').insertAdjacentHTML('beforeend', `<p class="unknown">Approved review could not be loaded for this artifact: ${body.error}</p>`); return; }
+  importedReview = body;
+  $('publishBtn').disabled = false;
+  $('artifactView').insertAdjacentHTML('beforeend', `<p>Approved review loaded (classification: <strong>${body.classification}</strong>). Accepted: ${body.accepted_fields.join(', ')}. Plan <code>${body.plan_digest.slice(0, 12)}…</code></p>`);
+});
+
 $('publishBtn').addEventListener('click', async () => {
   const token = ++evidenceGeneration;
+  bumpEpoch();
   const artifactId = stagedArtifact.artifact_id;
   const res = await fetch('/api/publications', {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -208,7 +247,10 @@ $('publishBtn').addEventListener('click', async () => {
   const result = await res.json();
   if (token !== evidenceGeneration || stagedArtifact?.artifact_id !== artifactId) return;
   if (!res.ok) { $('artifactView').insertAdjacentHTML('beforeend', `<p class="unknown">Publication failed: ${result.error}</p>`); return; }
-  $('artifactView').insertAdjacentHTML('beforeend', `<p>Publication: <strong>${result.status}</strong> → wine <code>${result.wine_id}</code> revision ${result.revision} (review classification: ${importedReview?.classification}). Rescan the bottle above to see it match, then ask it a question.</p>`);
+  const provenanceText = result.status === 'already_published'
+    ? `existing facts and provenance unchanged (stored review classification: ${result.review_classification ?? 'catalog seed'})`
+    : `review classification: ${result.review_classification}`;
+  $('artifactView').insertAdjacentHTML('beforeend', `<p>Publication: <strong>${result.status}</strong> → wine <code>${result.wine_id}</code> revision ${result.revision} (${provenanceText}). Rescan the bottle above to see it match, then ask it a question.</p>`);
   if (result.wine_id) setAskWine(result.wine_id);
   await loadRegions();
 });
@@ -216,6 +258,7 @@ $('publishBtn').addEventListener('click', async () => {
 document.querySelectorAll('.ask-q').forEach((btn) => btn.addEventListener('click', async () => {
   if (!askWineId) { $('askAnswer').textContent = 'Match or publish a wine first.'; return; }
   const token = ++chatGeneration;
+  bumpEpoch();
   const wineId = askWineId;
   const res = await fetch('/api/chat', {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -237,6 +280,7 @@ async function loadRegions() {
       ? wines.map((w) => `<button class="chip-btn" data-wine="${w.wine_id}">${w.producer} · ${w.name} · ${w.vintage ?? 'vintage unknown'}</button>`).join('')
       : '<span class="muted">No wines in this region yet.</span>';
     document.querySelectorAll('#regionChips .chip-btn').forEach((chip) => chip.addEventListener('click', async () => {
+      bumpEpoch();
       document.querySelectorAll('#regionChips .chip-btn').forEach((c) => c.classList.toggle('sel', c === chip));
       const token = ++explorerGeneration;
       const { wine } = await (await fetch(`/api/wines/${chip.dataset.wine}`)).json();
@@ -248,6 +292,7 @@ async function loadRegions() {
   document.querySelectorAll('.region-map path').forEach((p) => {
     const choose = () => {
       explorerGeneration += 1;
+      bumpEpoch();
       document.querySelectorAll('.region-map path').forEach((x) => x.classList.toggle('sel', x === p));
       $('explorerDetails').textContent = 'Select a wine.';
       renderChips(p.dataset.region);
@@ -289,54 +334,58 @@ $('rescanBtn').addEventListener('click', () => {
   if (lastScan) runScan(lastScan.fixture_id, `req-${Date.now()}-rescan`);
 });
 $('resetBtn').addEventListener('click', async () => {
-  // Capture this reset's generation. If a newer selection/scan/reset
-  // supersedes it while the request is in flight, its late completion
-  // must not clear the newer state — and a failed reset must never
-  // report success.
-  const token = ++generation;
+  // Per-panel snapshot invalidation: capture every panel's generation.
+  // On completion, a panel that saw no newer action is cleared (and its
+  // generation bumped so any in-flight pre-reset response — e.g. a late
+  // scan — is discarded); a panel with a newer action keeps that newer
+  // state untouched. A failed reset never reports success and preserves
+  // current facts.
+  const snap = { generation, evidenceGeneration, chatGeneration, explorerGeneration };
   let response;
   try {
     response = await fetch('/api/reset', { method: 'POST' });
     if (!response.ok) throw new Error(`reset_http_${response.status}`);
   } catch (e) {
-    if (token !== generation) return;
-    // Preserve the current result exactly: wine facts, lastScan and the
-    // replay binding stay untouched; the error is shown separately and
-    // never as a reset success.
+    if (snap.generation !== generation) return; // a newer scan owns the outcome panel
     const resetError = $('resetError');
     resetError.textContent = `Reset failed (${e.message}). Current results were left as they are.`;
     resetError.hidden = false;
     return;
   }
-  if (token !== generation) return; // Outdated reset: a newer state owns the UI.
-  lastScan = null;
-  $('replayBtn').disabled = true;
-  $('rescanBtn').disabled = true;
-  clearOutcome('Workspace reset.', 'All observations and demand were cleared; the catalog was reseeded.');
-  $('result').textContent = 'Nothing scanned yet.';
-  // A reset also invalidates every other panel's state: staged/review
-  // artifacts no longer exist, chat loses its wine, and explorer and
-  // document selections start over. In-flight panel responses are
-  // discarded via their generation tokens.
-  evidenceGeneration += 1;
-  explorerGeneration += 1;
-  chatGeneration += 1;
-  selectedDocument = null;
-  stagedArtifact = null;
-  importedReview = null;
-  askWineId = null;
-  $('stageBtn').disabled = true;
-  $('playbackReviewBtn').disabled = true;
-  $('publishBtn').disabled = true;
-  document.querySelectorAll('.doc-card').forEach((c) => c.classList.remove('sel'));
-  $('artifactView').textContent = 'No document staged yet.';
-  $('askWineLabel').textContent = 'Match or publish a wine first.';
-  $('askAnswer').textContent = 'No question asked yet.';
-  document.querySelectorAll('.region-map path').forEach((x) => x.classList.remove('sel'));
-  $('regionChips').innerHTML = '';
-  $('explorerDetails').textContent = 'Select a region, then a wine.';
+  if (snap.generation === generation) {
+    generation += 1; // invalidate any in-flight pre-reset scan response
+    lastScan = null;
+    $('replayBtn').disabled = true;
+    $('rescanBtn').disabled = true;
+    clearOutcome('Workspace reset.', 'All observations and demand were cleared; the catalog was reseeded.');
+    $('result').textContent = 'Nothing scanned yet.';
+  }
+  if (snap.evidenceGeneration === evidenceGeneration) {
+    evidenceGeneration += 1; // invalidate in-flight stage/review/publish
+    selectedDocument = null;
+    stagedArtifact = null;
+    importedReview = null;
+    $('stageBtn').disabled = true;
+    $('playbackReviewBtn').disabled = true;
+    $('approvedReviewBtn').disabled = true;
+    $('publishBtn').disabled = true;
+    document.querySelectorAll('.doc-card').forEach((c) => c.classList.remove('sel'));
+    $('artifactView').textContent = 'No document staged yet.';
+  }
+  if (snap.chatGeneration === chatGeneration) {
+    chatGeneration += 1;
+    askWineId = null;
+    $('askWineLabel').textContent = 'Match or publish a wine first.';
+    $('askAnswer').textContent = 'No question asked yet.';
+  }
+  if (snap.explorerGeneration === explorerGeneration) {
+    explorerGeneration += 1;
+    document.querySelectorAll('.region-map path').forEach((x) => x.classList.remove('sel'));
+    $('regionChips').innerHTML = '';
+    $('explorerDetails').textContent = 'Select a region, then a wine.';
+    await loadRegions();
+  }
   await refreshDemands();
-  await loadRegions();
 });
 
 load();

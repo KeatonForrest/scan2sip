@@ -15,12 +15,16 @@ changes return to review before implementation.
   three distinct simulated provider failures.
 - Fixture manifest with per-asset provenance (`docs/FIXTURE-MANIFEST.md`).
 
-## Later milestones (behind review checkpoints, not in milestone 1)
+## Milestone 2 (implemented; see the milestone-2 section below)
 
 - Synthetic HTML document → quoted evidence → staging → review →
   deduplication → publication → retrieval update.
 - Wine-specific chat bound to the exact published wine revision, with
   citations or an explicit insufficient-evidence answer.
+- A compact fictional-region explorer over the same catalog facts.
+
+## Later steps (behind review checkpoints)
+
 - Clean-checkout evaluation run and a short recording.
 
 ## Out of scope (all milestones unless separately approved)
@@ -106,7 +110,7 @@ production data or credentials of any kind; automatic retries.
 - `GET /api/demands` — deduplicated local research demand.
 - `POST /api/reset` — reseed the disposable fixture workspace (local only).
 
-## Milestone 2 — synthetic HTML ingestion, review, publication, chat (packet for review; not yet implemented)
+## Milestone 2 — synthetic HTML ingestion, review, publication, chat (implemented)
 
 One walkthrough: scan the unknown fictional Glassfinch Aurelia White 2018
 → open its synthetic producer sheet → stage quoted facts → review
@@ -159,8 +163,12 @@ question answered from its published revision with source quotes.
   or a different `reviewer_ref` string is **not** independent approval:
   a review carries independently-reviewed status only when its exact
   digest matches an S-reviewed, hash-pinned artifact recorded in the
-  demo configuration. Until S approves final bindings, every shipped
-  or imported example remains simulated playback.
+  demo configuration. One such artifact now exists: the Glassfinch
+  review (`fixtures/documents/approved-glassfinch-review.json`,
+  canonical digest pinned server-side), independently approved after
+  source and exact-binding review. Every other shipped or imported
+  example remains simulated playback, and tampering with the approved
+  artifact's bytes or bindings forfeits the pinned status.
 - **Deterministic review expiry:** fixture reviews use fixed fixture
   timestamps (reviewed 2026-10-01, `review_before` 2026-12-30) checked
   against a pinned workspace demo clock (shown in the UI as a fixture
