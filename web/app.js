@@ -146,8 +146,23 @@ $('rescanBtn').addEventListener('click', () => {
   if (lastScan) runScan(lastScan.fixture_id, `req-${Date.now()}-rescan`);
 });
 $('resetBtn').addEventListener('click', async () => {
-  generation += 1;
-  await fetch('/api/reset', { method: 'POST' });
+  // Capture this reset's generation. If a newer selection/scan/reset
+  // supersedes it while the request is in flight, its late completion
+  // must not clear the newer state — and a failed reset must never
+  // report success.
+  const token = ++generation;
+  let response;
+  try {
+    response = await fetch('/api/reset', { method: 'POST' });
+    if (!response.ok) throw new Error(`reset_http_${response.status}`);
+  } catch (e) {
+    if (token !== generation) return;
+    clearOutcome('Reset failed', `The workspace could not be reset (${e.message}). Current results were left as they are.`);
+    $('outcomeChip').textContent = 'Failed';
+    $('outcomeChip').className = 'chip chip-failed';
+    return;
+  }
+  if (token !== generation) return; // Outdated reset: a newer state owns the UI.
   lastScan = null;
   $('replayBtn').disabled = true;
   $('rescanBtn').disabled = true;
