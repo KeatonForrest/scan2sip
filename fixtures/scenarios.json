@@ -1,0 +1,14 @@
+{
+  "scenarios": [
+    { "fixture_id": "scan-orchard-2021", "label": "labels/label-orchard-2021.svg", "title": "Correct catalog match", "expect": "matched" },
+    { "fixture_id": "scan-orchard-2022-mismatch", "label": "labels/label-orchard-2022.svg", "title": "Vintage mismatch (2022 vs catalog 2020/2021)", "expect": "missing/vintage_mismatch" },
+    { "fixture_id": "scan-blurred-orchard", "label": "labels/label-orchard-blurred.svg", "title": "Blurred label — uncertain", "expect": "provisional" },
+    { "fixture_id": "scan-unknown-glassfinch", "label": "labels/label-glassfinch-2018.svg", "title": "Unknown wine", "expect": "missing/unknown_wine" },
+    { "fixture_id": "scan-novintage-sable", "label": "labels/label-sable-meadow.svg", "title": "Explicit no-vintage identity", "expect": "matched" },
+    { "fixture_id": "scan-novintage-orchard", "label": "labels/label-orchard-novintage.svg", "title": "Vintage unreadable on a year-specific wine", "expect": "missing/vintage_required" },
+    { "fixture_id": "scan-not-wine", "label": "labels/label-not-wine.svg", "title": "Not a wine bottle", "expect": "not_wine" },
+    { "fixture_id": "fail-error-response", "label": "labels/label-fail-error.svg", "title": "Simulated provider error response", "expect": "failed/provider_error_response" },
+    { "fixture_id": "fail-malformed", "label": "labels/label-fail-malformed.svg", "title": "Simulated malformed response", "expect": "failed/malformed_response" },
+    { "fixture_id": "fail-timeout", "label": "labels/label-fail-timeout.svg", "title": "Simulated ambiguous timeout", "expect": "failed/provider_timeout_ambiguous" }
+  ]
+}

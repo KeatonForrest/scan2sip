@@ -1,0 +1,62 @@
+{
+  "wines": [
+    {
+      "id": "wine-orchard-lantern-hillside-red-2021",
+      "producer": "Orchard Lantern",
+      "name": "Hillside Red",
+      "vintage": 2021,
+      "identification_aliases": [
+        { "producer": "Orchard Lantern Estate", "name": "Hillside Red", "vintage": 2021 }
+      ],
+      "fields": {
+        "region": { "value": "Ember Valley", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Grown on the terraced slopes of Ember Valley." },
+        "varietal": { "value": "Syrah", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Hillside Red is made entirely from Syrah." },
+        "tasting_notes": { "value": "Pepper and plum, medium tannin.", "status": "AI-generated fixture", "source_id": "fixture://model/tasting-note-orchard-2021", "quote": null },
+        "producer_info": { "value": "A fictional two-person winery founded for this demonstration.", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Orchard Lantern is a two-person winery." },
+        "food_pairings": { "value": null, "status": "unknown", "source_id": null, "quote": null }
+      }
+    },
+    {
+      "id": "wine-orchard-lantern-hillside-red-2020",
+      "producer": "Orchard Lantern",
+      "name": "Hillside Red",
+      "vintage": 2020,
+      "identification_aliases": [],
+      "fields": {
+        "region": { "value": "Ember Valley", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Grown on the terraced slopes of Ember Valley." },
+        "varietal": { "value": "Syrah", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Hillside Red is made entirely from Syrah." },
+        "tasting_notes": { "value": null, "status": "unknown", "source_id": null, "quote": null },
+        "producer_info": { "value": "A fictional two-person winery founded for this demonstration.", "status": "reviewed synthetic source", "source_id": "fixture://orchard-lantern/hillside-red-sheet", "quote": "Orchard Lantern is a two-person winery." },
+        "food_pairings": { "value": null, "status": "unknown", "source_id": null, "quote": null }
+      }
+    },
+    {
+      "id": "wine-coppermoth-ridge-pinot-noir-2019",
+      "producer": "Coppermoth Ridge",
+      "name": "Pinot Noir",
+      "vintage": 2019,
+      "identification_aliases": [],
+      "fields": {
+        "region": { "value": "Lantern Coast", "status": "reviewed synthetic source", "source_id": "fixture://coppermoth-ridge/pinot-sheet", "quote": "Vines above the Lantern Coast fog line." },
+        "varietal": { "value": "Pinot Noir", "status": "reviewed synthetic source", "source_id": "fixture://coppermoth-ridge/pinot-sheet", "quote": "A single-varietal Pinot Noir." },
+        "tasting_notes": { "value": "Cherry and forest floor (invented for this demo).", "status": "AI-generated fixture", "source_id": "fixture://model/tasting-note-coppermoth-2019", "quote": null },
+        "producer_info": { "value": null, "status": "unknown", "source_id": null, "quote": null },
+        "food_pairings": { "value": null, "status": "unknown", "source_id": null, "quote": null }
+      }
+    },
+    {
+      "id": "wine-sable-and-fern-meadow-white-nv",
+      "producer": "Sable & Fern",
+      "name": "Meadow White",
+      "vintage": null,
+      "identification_aliases": [],
+      "fields": {
+        "region": { "value": "Fern Hollow", "status": "reviewed synthetic source", "source_id": "fixture://sable-and-fern/meadow-sheet", "quote": "From the shaded rows of Fern Hollow." },
+        "varietal": { "value": "White field blend", "status": "reviewed synthetic source", "source_id": "fixture://sable-and-fern/meadow-sheet", "quote": "A white field blend of mixed rows." },
+        "tasting_notes": { "value": null, "status": "unknown", "source_id": null, "quote": null },
+        "producer_info": { "value": null, "status": "unknown", "source_id": null, "quote": null },
+        "food_pairings": { "value": null, "status": "unknown", "source_id": null, "quote": null }
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "scan-orchard-2021": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.97, "producer": "Orchard Lantern", "name": "Hillside Red", "vintage": 2021, "region": "Ember Valley", "varietal": "Syrah" }
+  },
+  "scan-orchard-2022-mismatch": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.93, "producer": "Orchard Lantern", "name": "Hillside Red", "vintage": 2022, "region": "Ember Valley", "varietal": "Syrah" }
+  },
+  "scan-blurred-orchard": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.42, "producer": "Orchard Lantern", "name": "Hillside Red", "vintage": null, "region": null, "varietal": null }
+  },
+  "scan-unknown-glassfinch": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.95, "producer": "Glassfinch", "name": "Aurelia White", "vintage": 2018, "region": "Pale Coast", "varietal": "Albariño" }
+  },
+  "scan-novintage-sable": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.9, "producer": "Sable & Fern", "name": "Meadow White", "vintage": null, "region": "Fern Hollow", "varietal": "White field blend" }
+  },
+  "scan-novintage-orchard": {
+    "mode": "ok",
+    "raw": { "is_wine": true, "confidence": 0.9, "producer": "Orchard Lantern", "name": "Hillside Red", "vintage": null, "region": null, "varietal": "Syrah" }
+  },
+  "scan-not-wine": {
+    "mode": "ok",
+    "raw": { "is_wine": false, "confidence": 0.88, "producer": null, "name": null, "vintage": null, "region": null, "varietal": null }
+  },
+  "fail-error-response": {
+    "mode": "error_response",
+    "error": "simulated_upstream_unavailable"
+  },
+  "fail-malformed": {
+    "mode": "malformed",
+    "raw": { "is_wine": "yes", "producer": 42, "vintage": "unknown" }
+  },
+  "fail-timeout": {
+    "mode": "timeout"
+  }
+}

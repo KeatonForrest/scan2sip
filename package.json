@@ -1,0 +1,17 @@
+{
+  "name": "scan2sip",
+  "version": "0.1.0",
+  "description": "Local synthetic-fixture scan-to-knowledge demo (no credentials, no provider calls).",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

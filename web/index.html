@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scan2sip — synthetic fixture demo</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="banner">
+  <strong>Synthetic fixture demo</strong> — fictional wines and authored model
+  responses. No credentials, no provider calls. Simulated provider output;
+  provider latency <strong>N/A</strong>. AI-generated fixture notes are never
+  producer-verified. Review/publication and chat arrive in a later milestone.
+</header>
+<main>
+  <h1>scan<span>2</span>sip</h1>
+  <p class="sub">Bottle label → identity → exact match or visible uncertainty → attributed details.</p>
+
+  <section>
+    <h2>1 · Pick a fixture label</h2>
+    <div id="scenarios" class="grid"></div>
+  </section>
+
+  <section>
+    <h2>2 · Scan</h2>
+    <div class="row">
+      <button id="scanBtn" disabled>Scan selected label</button>
+      <button id="replayBtn" disabled>Replay same request</button>
+      <button id="rescanBtn" disabled>Deliberate rescan (new request)</button>
+      <button id="resetBtn">Reset workspace</button>
+    </div>
+    <pre id="result" aria-live="polite">Select a label to begin.</pre>
+  </section>
+
+  <section>
+    <h2>3 · Attributed details</h2>
+    <div id="wine">No matched wine yet.</div>
+  </section>
+
+  <section>
+    <h2>Local research demand <small>(unmatched / uncertain scans only — never catalog facts)</small></h2>
+    <div id="demands">None.</div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
