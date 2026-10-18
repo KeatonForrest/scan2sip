@@ -120,6 +120,40 @@ test('explicit review must arrive bound: wrong artifact_sha and unbound reviews 
   );
 });
 
+for (const { title, reviewer_ref, curator_ref, error } of [
+  { title: 'the actual curator cannot review by substituting the curator name', reviewer_ref: 'demo-operator', curator_ref: 'substituted-curator', error: 'invalid_review_separation' },
+  { title: 'the actual curator cannot review when the curator name is omitted', reviewer_ref: 'demo-operator', error: 'invalid_review_separation' },
+  { title: 'a different reviewer cannot substitute the artifact curator', reviewer_ref: 'external-reviewer', curator_ref: 'substituted-curator', error: 'invalid_review_binding' },
+  { title: 'a different reviewer may omit the curator name', reviewer_ref: 'external-reviewer' },
+]) {
+  test(`review separation: ${title}`, async (t) => {
+    const { digest } = await import('../src/core/digest.js');
+    const demo = makeDemo();
+    t.after(() => demo.store.close());
+    const artifact = stageGlassfinch(demo);
+    const snapshot = demo.ingestion.snapshot();
+    const review = {
+      schema: 'scan2sip-review-v1', kind: 'playback', reviewer_ref,
+      ...(curator_ref === undefined ? {} : { curator_ref }),
+      reviewed_at: '2026-10-01T00:00:00.000Z',
+      review_before: '2026-12-30T00:00:00.000Z', accepted_fields: ['region'],
+      artifact_sha256: artifact.artifact_sha256, catalog_snapshot_sha256: snapshot,
+      plan_digest: digest({ artifact_sha256: artifact.artifact_sha256, accepted_fields: ['region'], catalog_snapshot_sha256: snapshot }),
+    };
+    const importReview = () => demo.ingestion.importReview(artifact.artifact_id, { review });
+    if (error) {
+      assert.throws(importReview, (e) => e.code === error);
+      assert.deepEqual(demo.store.getReviews(artifact.artifact_sha256), []);
+      assert.throws(
+        () => demo.ingestion.publish({ artifact_id: artifact.artifact_id, request_id: 'pub-rejected-review' }),
+        (e) => e.code === 'review_required',
+      );
+    } else {
+      assert.equal(importReview().classification, 'simulated-playback');
+    }
+  });
+}
+
 test('decisions contradicting accepted_fields are rejected', () => {
   const demo = makeDemo();
   const artifact = stageGlassfinch(demo);

@@ -173,8 +173,13 @@ export function createIngestion({
     const supported = new Set(artifact.fields.filter((f) => f.support === 'supported').map((f) => f.field));
     if (!Array.isArray(accepted) || accepted.length === 0) throw err('invalid_review');
     if (accepted.some((f) => !supported.has(f))) throw err('invalid_review_unsupported_accept');
-    if (!review.reviewer_ref || review.reviewer_ref === (review.curator_ref ?? artifact.curator_ref)) {
+    // The staged artifact owns the curator identity; imported metadata
+    // cannot substitute another curator to bypass reviewer separation.
+    if (!review.reviewer_ref || review.reviewer_ref === artifact.curator_ref) {
       throw err('invalid_review_separation');
+    }
+    if (review.curator_ref !== undefined && review.curator_ref !== artifact.curator_ref) {
+      throw err('invalid_review_binding');
     }
     const snapshot = catalogSnapshotDigest(store.listWines());
     if (review.catalog_snapshot_sha256 && review.catalog_snapshot_sha256 !== snapshot) {
